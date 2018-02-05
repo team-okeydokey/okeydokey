@@ -1,2 +1,2 @@
-# Villim
-Smart contracts for a home rental network with IoT doorlocks
+# OkeyDokey
+Smart contracts for an automated hotel marketplace

@@ -33,9 +33,9 @@ contract OkeyDokeyGod {
     /**
      * Return entry address to OkeyDokey.
      *
-     * @return okeydokeyAddr Address of OkeyDokey.
+     * @return okeyDokeyAddr Address of OkeyDokey.
      */
-    function getAddress() public view returns (address okeydokeyAddr){
+    function getAddress() public view returns (address okeyDokeyAddr){
         okeyDokeyAddr = okeyDokeyAddress;
         return okeyDokeyAddr;
     }

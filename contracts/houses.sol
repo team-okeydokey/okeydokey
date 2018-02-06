@@ -6,18 +6,21 @@ contract OkeyDokey {
 }
 
 
-contract Devices {
+// contract Devices {
 
-}
+// }
 
-contract Reservations {
+// contract Reservations {
 
-}
+// }
 
 contract Houses {
 
 	/** Admin of this contract. */
     address private admin;
+
+    /** Running count of house ids. Smallest valid house index is 1. */
+    uint256 houseId = 0;
 
     /** Map of house ids to each corresponding house. */
     mapping(uint256 => House) private houses;
@@ -26,7 +29,7 @@ contract Houses {
     mapping(address => uint256[]) private housesOf;
 
     /** Map of a grid's id to houses located in that particular grid. */
-    mapping(address => uint256[]) private housesIn;
+    mapping(uint256 => uint256[]) private housesInGrid;
 
     /** Address of OkeyDokey contract. */
     address private okeyDokeyAddress;
@@ -34,21 +37,56 @@ contract Houses {
     /** Instance of Devices contract. */
     OkeyDokey private okeyDokey;
 
-    /** Address of Devices contract. */
-    address private devicesAddress;
+    // /** Address of Devices contract. */
+    // address private devicesAddress;
 
-    /** Instance of Devices contract. */
-    Devices private devices;
+    // /** Instance of Devices contract. */
+    // Devices private devices;
 
     /** Address of Reservations contract. */
-    address private reservationsAddress;
+    // address private reservationsAddress;
 
     /** Instance of Reservations contract. */
-    Reservations private reservations;
+    // Reservations private reservations;
 
     /** Structure of a house. */
     struct House {
+        uint256 id;
 
+        /* Owner info */
+        address host;
+        string hostName;
+        address[] administrators;
+        address[] devices;
+
+        /* House info */
+        string houseName;
+        string addrFull;
+        string addrSummary;
+        string addrDirection;
+        string description;
+        string housePolicy;
+        string cancellationPolicy;
+        uint8 houseType;
+        uint256 numGuest;
+        uint256 numBedroom;
+        uint256 numBed;
+        uint256 numBathroom;
+        uint8[] amenities;
+        string[] imageHashes;
+
+        /* Price */
+        uint256 hourlyRate;
+        uint256 dailyRate;
+        uint256 utilityFee;
+        uint256 cleaningFee;
+
+        /* Location */
+        uint256 latitude;
+        uint256 longitude;
+
+        /* Logistics */
+        bool active;
     }
 
     /**
@@ -75,19 +113,122 @@ contract Houses {
         okeyDokeyAddress = _okeyDokeyAddress;
         okeyDokey = OkeyDokey(okeyDokeyAddress);
 
-        devicesAddress = okeyDokey.getAddress(2);
-        devices = Devices(devicesAddress);
+        // devicesAddress = okeyDokey.getAddress(2);
+        // devices = Devices(devicesAddress);
 
-        reservationsAddress = okeyDokey.getAddress(3);
-        reservations = Reservations(reservationsAddress);
+        // reservationsAddress = okeyDokey.getAddress(3);
+        // reservations = Reservations(reservationsAddress);
 
-        require(devicesAddress != 0x0);
-        require(devicesAddress != address(this));
+        // require(devicesAddress != 0x0);
+        // require(devicesAddress != address(this));
 
-        require(reservationsAddress != 0x0);
-        require(reservationsAddress != address(this));
+        // require(reservationsAddress != 0x0);
+        // require(reservationsAddress != address(this));
 
         return true;
+    }
+
+    /**
+     * Register and list a new house.
+     *
+     * @param houseName The name of the house. Also used as the title of listing.
+     * @param hostName The name of the host.
+     * @param addrFull Full address of the house.
+     * @param addrSummary Shortened address of the house.
+     * @param addrDirection Instructions on how to find the house.
+     * @param description House description, provided by the host.
+     * @param housePolicy Basic house rules set by the host.
+     * @param cancellationPolicy The cancellation policy of the booking.
+     * @param houseType The type of the house.
+     * @param numGuest The number of guests the house can accomodate.
+     * @param numBedroom The number of bedrooms in the house.
+     * @param numBed The total number of beds in the house.
+     * @param numBathroom The number of bathrooms in the house.
+     * @param hourlyRate The hourly rate of the house.
+     * @param dailyRate The daily rate of the house.
+     * @param utilityFee The utility fee of the house.
+     * @param cleaningFee The cleaning fee of the house.
+     * @param latitude The lattitude of the house, multiplied by 1 million.
+     * @param longitude The longitude of the house, multiplied by 1 million.
+     * @return success Whether the registration was successful.
+     * @return newId Id of the new house. Must be greater than 0 to be considered valid.
+     */
+    function registerHouse(string houseName, string hostName, 
+        string addrFull, string addrSummary, string addrDirection, string description,
+        string housePolicy, string cancellationPolicy, uint8 houseType, 
+        uint256 numGuest, uint256 numBedroom, uint256 numBed, uint256 numBathroom,
+        uint256 hourlyRate, uint256 dailyRate, uint256 utilityFee, uint256 cleaningFee, 
+        uint256 latitude, uint256 longitude) public returns (bool success, uint256 newId) {
+
+        success = false;
+        newId = 0;
+
+        bool succ;
+        uint256 gridId;
+        (succ, gridId) = getGridId(house.latitude, house.longitude);
+        if (!succ) {return;}
+
+        /* Smallest houseId is 1 */
+        houseId += 1;
+
+        House house; 
+
+        house.id = houseId;
+
+        /* Owner info */
+        house.host = msg.sender;
+        house.hostName = hostName;
+        house.administrators.push(msg.sender);
+
+        /* House info */
+        house.houseName = houseName;
+        house.addrFull = addrFull;
+        house.addrSummary = addrSummary;
+        house.addrDirection = addrDirection;
+        house.description = description;
+        house.housePolicy = housePolicy;
+        house.cancellationPolicy = cancellationPolicy;
+        house.houseType = houseType;
+        house.numGuest = numGuest;
+        house.numBedroom = numBedroom;
+        house.numBed = numBed;
+        house.numBathroom = numBathroom;
+
+        /* Price */
+        house.hourlyRate = hourlyRate;
+        house.dailyRate = dailyRate;
+        house.utilityFee = utilityFee;
+        house.cleaningFee = cleaningFee;
+
+        /* Location */
+        house.latitude = latitude;
+        house.longitude = longitude;
+
+        /* Logistics */
+        house.active = true;
+
+        /* Add newly created house to storage. */
+        houses[house.id] = house;
+        housesOf[msg.sender].push(house.id);
+        housesInGrid[gridId].push(house.id);
+
+        success = true;
+        newId = house.id;
+    } 
+
+    /**
+     * Calculate grid id from coordinates.
+     *
+     * @param latitude The lattitude of the house, multiplied by 1 million.
+     * @param longitude The longitude of the house, multiplied by 1 million.
+     * @return success Whether the coordinates were valid.
+     * @return gridId Id within the earth's grid.
+     */
+    function getGridId(uint256 latitude, uint256 longitude) public returns (bool success, uint256 gridId) {
+        success = false;
+
+        success = true;
+        gridId = 0;
     }
 
     /**

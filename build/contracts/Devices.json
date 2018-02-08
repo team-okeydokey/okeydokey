@@ -1,0 +1,69 @@
+{
+  "contractName": "Devices",
+  "abi": [],
+  "bytecode": "0x60606040523415600e57600080fd5b603580601b6000396000f3006060604052600080fd00a165627a7a723058206b33d11fe8ead313af62d2f4e493914efa693d326535aba4271f3ab231ee3e160029",
+  "deployedBytecode": "0x6060604052600080fd00a165627a7a723058206b33d11fe8ead313af62d2f4e493914efa693d326535aba4271f3ab231ee3e160029",
+  "sourceMap": "26:21:1:-;;;;;;;;;;;;;;;;;",
+  "deployedSourceMap": "26:21:1:-;;;;;",
+  "source": "pragma solidity ^0.4.19;\n\ncontract Devices {\n\n}\n",
+  "sourcePath": "/home/seongmin/okeydokey/contracts/devices.sol",
+  "ast": {
+    "attributes": {
+      "absolutePath": "/home/seongmin/okeydokey/contracts/devices.sol",
+      "exportedSymbols": {
+        "Devices": [
+          59
+        ]
+      }
+    },
+    "children": [
+      {
+        "attributes": {
+          "literals": [
+            "solidity",
+            "^",
+            "0.4",
+            ".19"
+          ]
+        },
+        "id": 58,
+        "name": "PragmaDirective",
+        "src": "0:24:1"
+      },
+      {
+        "attributes": {
+          "baseContracts": [
+            null
+          ],
+          "contractDependencies": [
+            null
+          ],
+          "contractKind": "contract",
+          "documentation": null,
+          "fullyImplemented": true,
+          "linearizedBaseContracts": [
+            59
+          ],
+          "name": "Devices",
+          "nodes": [
+            null
+          ],
+          "scope": 60
+        },
+        "id": 59,
+        "name": "ContractDefinition",
+        "src": "26:21:1"
+      }
+    ],
+    "id": 60,
+    "name": "SourceUnit",
+    "src": "0:48:1"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.4.19+commit.c4cbbb05.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "1.0.1",
+  "updatedAt": "2018-02-08T16:23:55.475Z"
+}

@@ -132,27 +132,21 @@ contract Houses {
     /**
      * Register and list a new house (1).
      *
+     * Divided into three functions because 
+     * Solidity limits the number of local variables to 16.
+     *
      * @param houseName The name of the house. Also used as the title of listing.
      * @param hostName The name of the host.
      * @param addrFull Full address of the house.
      * @param addrSummary Shortened address of the house.
      * @param addrDirection Instructions on how to find the house.
      * @param description House description, provided by the host.
-     * @param housePolicy Basic house rules set by the host.
-     * @param cancellationPolicy The cancellation policy of the booking.
-     * @param houseType The type of the house.
-     * @param numGuest The number of guests the house can accomodate.
-     * @param numBedroom The number of bedrooms in the house.
-     * @param numBed The total number of beds in the house.
-     * @param numBathroom The number of bathrooms in the house.
      * @return success Whether the registration was successful.
      * @return newId Id of the new house. Must be greater than 0 to be considered valid.
      */
     function registerHouse1(string houseName, string hostName, 
         string addrFull, string addrSummary, string addrDirection, 
-        string description, string housePolicy, string cancellationPolicy, 
-        uint8 houseType, uint256 numGuest, uint256 numBedroom, 
-        uint256 numBed, uint256 numBathroom) public returns (bool success, uint256 newId) {
+        string description) public returns (bool success, uint256 newId) {
 
         success = false;
         newId = 0;
@@ -175,13 +169,6 @@ contract Houses {
         house.addrSummary = addrSummary;
         house.addrDirection = addrDirection;
         house.description = description;
-        house.housePolicy = housePolicy;
-        house.cancellationPolicy = cancellationPolicy;
-        house.houseType = houseType;
-        house.numGuest = numGuest;
-        house.numBedroom = numBedroom;
-        house.numBed = numBed;
-        house.numBathroom = numBathroom;
 
         /* Add newly created house to storage. */
         houses[house.id] = house;
@@ -198,6 +185,54 @@ contract Houses {
     /**
      * Register and list a new house (2).
      *
+     * Divided into three functions because 
+     * Solidity limits the number of local variables to 16.
+     *
+     * @param id The id of the house to continue initializing.
+     * @param housePolicy Basic house rules set by the host.
+     * @param cancellationPolicy The cancellation policy of the booking.
+     * @param houseType The type of the house.
+     * @param numGuest The number of guests the house can accomodate.
+     * @param numBedroom The number of bedrooms in the house.
+     * @param numBed The total number of beds in the house.
+     * @param numBathroom The number of bathrooms in the house.
+     * @return success Whether the registration was successful.
+     * @return newId Id of the new house. Must be greater than 0 to be considered valid.
+     */
+    function registerHouse2(uint256 id, string housePolicy, string cancellationPolicy, 
+        uint8 houseType, uint256 numGuest, uint256 numBedroom, 
+        uint256 numBed, uint256 numBathroom) public returns (bool success, uint256 newId) {
+
+        success = false;
+        newId = 0;
+
+        House storage house = houses[id];   
+
+        require(house.host == msg.sender);
+
+        /* House info */
+        house.housePolicy = housePolicy;
+        house.cancellationPolicy = cancellationPolicy;
+        house.houseType = houseType;
+        house.numGuest = numGuest;
+        house.numBedroom = numBedroom;
+        house.numBed = numBed;
+        house.numBathroom = numBathroom;
+
+        /* Logistics */
+        house.active = false;
+        house.valid = false;
+
+        success = true;
+        newId = house.id;
+    } 
+
+    /**
+     * Register and list a new house (2).
+     *
+     * Divided into three functions because 
+     * Solidity limits the number of local variables to 16.
+     *
      * @param id The id of the house to continue initializing.
      * @param hourlyRate The hourly rate of the house.
      * @param dailyRate The daily rate of the house.
@@ -208,8 +243,8 @@ contract Houses {
      * @return success Whether the registration was successful.
      * @return newId Id of the new house. Must be greater than 0 to be considered valid.
      */
-    function registerHouse2(uint256 id, uint256 hourlyRate, 
-        uint256 dailyRate, uint256 utilityFee, uint256 cleaningFee, 
+    function registerHouse3(uint256 id,  
+        uint256 hourlyRate, uint256 dailyRate, uint256 utilityFee, uint256 cleaningFee, 
         uint256 latitude, uint256 longitude) public returns (bool success, uint256 newId) {
 
         success = false;
@@ -247,6 +282,131 @@ contract Houses {
 
         success = true;
         newId = house.id;
+    } 
+
+    /**
+     * Fetch house info (1).
+     *
+     * Divided into three functions because 
+     * Solidity limits the number of local variables to 16.
+     *
+     * @param id The id of the house to query.
+     * @return success Whether the query was successful.
+     * @return houseName The name of the house. Also used as the title of listing.
+     * @return hostName The name of the host.
+     * @return addrFull Full address of the house.
+     * @return addrSummary Shortened address of the house.
+     * @return addrDirection Instructions on how to find the house.
+     * @return description House description, provided by the host.
+     * @return housePolicy Basic house rules set by the host.
+     * @return cancellationPolicy The cancellation policy of the booking.
+     * @return houseType The type of the house.
+     */
+    function getHouseInfo1(uint256 id) public view 
+        returns (bool success, string houseName, string hostName,
+                 string addrFull, string addrSummary, string addrDirection,
+                 string description) {
+
+        success = false;
+        
+        House memory house = houses[id];   
+
+        if (!house.valid) {
+            return;
+        }
+
+        /* Owner info */
+        hostName = house.hostName;
+
+        /* House info */
+        houseName = house.houseName; 
+        addrFull = house.addrFull;
+        addrSummary = house.addrSummary; 
+        addrDirection = house.addrDirection; 
+        description = house.description;
+
+        success = true;
+    } 
+
+    /**
+     * Fetch house info (2).
+     *
+     * Divided into three functions because 
+     * Solidity limits the number of local variables to 16.
+     *
+     * @param id The id of the house to query.
+     * @return success Whether the query was successful.
+     * @return description House description, provided by the host.
+     * @return housePolicy Basic house rules set by the host.
+     * @return cancellationPolicy The cancellation policy of the booking.
+     * @return houseType The type of the house.
+     * @return numGuest The number of guests the house can accomodate.
+     * @return numBedroom The number of bedrooms in the house.
+     * @return numBed The total number of beds in the house.
+     * @return numBathroom The number of bathrooms in the house.
+     */
+    function getHouseInfo2(uint256 id) public view 
+        returns (bool success, string housePolicy, string cancellationPolicy, 
+                 uint8 houseType, uint256 numGuest, uint256 numBedroom, 
+                 uint256 numBed, uint256 numBathroom) {
+
+        success = false;
+        
+        House memory house = houses[id];   
+
+        if (!house.valid) {
+            return;
+        }
+
+        /* House info */
+        housePolicy = house.housePolicy;
+        cancellationPolicy = house.cancellationPolicy;
+        houseType = house.houseType;
+        numGuest = house.numGuest;
+        numBedroom = house.numBedroom;
+        numBed = house.numBed;
+        numBathroom = house.numBathroom;
+
+        success = true;
+    } 
+
+    /**
+     * Fetch house info (3).
+     *
+     * Divided into three functions because 
+     * Solidity limits the number of local variables to 16.
+     *
+     * @param id The id of the house to query.
+     * @return success Whether the query was successful.
+     * @return hourlyRate The hourly rate of the house.
+     * @return dailyRate The daily rate of the house.
+     * @return utilityFee The utility fee of the house.
+     * @return cleaningFee The cleaning fee of the house.
+     * @return latitude The lattitude of the house, multiplied by 1 million.
+     * @return longitude The longitude of the house, multiplied by 1 million.
+     */
+    function getHouseInfo3(uint256 id) public view 
+        returns (bool success, uint256 hourlyRate, uint256 dailyRate, 
+                 uint256 utilityFee, uint256 cleaningFee, 
+                 uint256 latitude, uint256 longitude) {
+
+        success = false;
+        
+        House memory house = houses[id];   
+
+        if (!house.valid) {
+            return;
+        }
+
+        /* House info */
+        hourlyRate = house.hourlyRate; 
+        dailyRate = house.dailyRate;
+        utilityFee = house.utilityFee; 
+        cleaningFee = house.cleaningFee; 
+        latitude = house.latitude; 
+        longitude = house.longitude;
+
+        success = true;
     } 
 
     /**

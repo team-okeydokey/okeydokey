@@ -471,31 +471,31 @@ contract Houses {
      * @param longitude The longitude of the house, multiplied by 1 million.
      * @return success Whether the edit was successful.
      */
-    // function editHouse3(uint256 id, uint256 hourlyRate, 
-    //     uint256 dailyRate, uint256 utilityFee, uint256 cleaningFee, 
-    //     uint256 latitude, uint256 longitude) onlyAdmins(id) public returns (bool success) {
+    function editHouse3(uint256 id, uint256 hourlyRate, 
+        uint256 dailyRate, uint256 utilityFee, uint256 cleaningFee, 
+        uint256 latitude, uint256 longitude) onlyAdmins(id) public returns (bool success) {
 
-    //     success = false;
+        success = false;
 
     //     House storage house = houses[id];   
     //     if (!house.valid) {
     //         return;
     //     }
 
-    //     /* Prices */
-    //     bool succ1 = updatePrices(id, hourlyRate, dailyRate, utilityFee, cleaningFee);
-    //     if (!succ1) {
-    //         return;
-    //     }
+        /* Prices */
+        bool succ1 = updatePrices(id, hourlyRate, dailyRate, utilityFee, cleaningFee);
+        if (!succ1) {
+            return;
+        }
 
-    //     /* Coordinates */
-    //     bool succ2 = updateCoordinates(id, latitude, longitude);
-    //     if (!succ2) {
-    //         return;
-    //     }
+        /* Coordinates */
+        bool succ2 = updateCoordinates(id, latitude, longitude);
+        if (!succ2) {
+            return;
+        }
 
     //     success = true;
-    // } 
+    } 
 
     /**
      * Update prices for a house listing.
@@ -511,7 +511,7 @@ contract Houses {
      * @return success Whether the update was successful.
      */
     function updatePrices(uint256 id, uint256 hourlyRate, uint256 dailyRate, 
-        uint256 utilityFee, uint256 cleaningFee) onlyAdmins(id) public returns (bool success) {
+        uint256 utilityFee, uint256 cleaningFee) internal returns (bool success) {
 
         House storage house = houses[id];  
         if (!house.valid) {
@@ -531,7 +531,6 @@ contract Houses {
      * Update coordinates for a house listing.
      *
      * Helper function for editHouse3. 
-     * Currently public due to stack size limitations in EVM.
      *
      * @param id The id of the house to edit.
      * @param latitude The lattitude of the house, multiplied by 1 million.
@@ -539,7 +538,7 @@ contract Houses {
      * @return success Whether the update was successful.
      */
     function updateCoordinates(uint256 id, uint256 latitude, uint256 longitude) 
-        onlyAdmins(id) public returns (bool success) {
+        internal returns (bool success) {
 
         success = false;
 
@@ -579,10 +578,9 @@ contract Houses {
      }
 
      /**
-     * Update coordinates for a house listing.
+     * Remove houseId from grid.
      *
      * Helper function for editHouse3. 
-     * Currently public due to stack size limitations in EVM.
      *
      * @param prevGridId The id of the grid to erase from.
      * @param id The id of the house to erase.

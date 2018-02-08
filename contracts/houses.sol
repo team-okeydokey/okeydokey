@@ -217,7 +217,7 @@ contract Houses {
         (succ, gridId) = getGridId(latitude, longitude);
         if (!succ) {
             /* This listing failed. Erase houseId. */
-            //delete houses[id];
+            delete houses[id];
             houseId -= 1;
             return;
         }
@@ -240,7 +240,7 @@ contract Houses {
         house.active = true;
 
         /* Add newly created house to storage. */
-        // housesInGrid[gridId].push(house.id);
+        housesInGrid[gridId].push(house.id);
 
         success = true;
         newId = house.id;

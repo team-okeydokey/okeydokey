@@ -477,11 +477,6 @@ contract Houses {
 
         success = false;
 
-    //     House storage house = houses[id];   
-    //     if (!house.valid) {
-    //         return;
-    //     }
-
         /* Prices */
         bool succ1 = updatePrices(id, hourlyRate, dailyRate, utilityFee, cleaningFee);
         if (!succ1) {
@@ -494,7 +489,7 @@ contract Houses {
             return;
         }
 
-    //     success = true;
+        success = true;
     } 
 
     /**

@@ -16,7 +16,7 @@ contract OkeyDokey {
 
 contract Houses {
 
-	/** Admin of this contract. */
+    /** Admin of this contract. */
     address private admin;
 
     /** Running count of house ids. Smallest valid house index is 1. */
@@ -129,7 +129,7 @@ contract Houses {
     }
 
     /**
-     * Register and list a new house.
+     * Register and list a new house (1).
      *
      * @param houseName The name of the house. Also used as the title of listing.
      * @param hostName The name of the host.
@@ -144,34 +144,22 @@ contract Houses {
      * @param numBedroom The number of bedrooms in the house.
      * @param numBed The total number of beds in the house.
      * @param numBathroom The number of bathrooms in the house.
-     * @param hourlyRate The hourly rate of the house.
-     * @param dailyRate The daily rate of the house.
-     * @param utilityFee The utility fee of the house.
-     * @param cleaningFee The cleaning fee of the house.
-     * @param latitude The lattitude of the house, multiplied by 1 million.
-     * @param longitude The longitude of the house, multiplied by 1 million.
      * @return success Whether the registration was successful.
      * @return newId Id of the new house. Must be greater than 0 to be considered valid.
      */
-    function registerHouse(string houseName, string hostName, 
-        string addrFull, string addrSummary, string addrDirection, string description,
-        string housePolicy, string cancellationPolicy, uint8 houseType, 
-        uint256 numGuest, uint256 numBedroom, uint256 numBed, uint256 numBathroom,
-        uint256 hourlyRate, uint256 dailyRate, uint256 utilityFee, uint256 cleaningFee, 
-        uint256 latitude, uint256 longitude) public returns (bool success, uint256 newId) {
+    function registerHouse1(string houseName, string hostName, 
+        string addrFull, string addrSummary, string addrDirection, 
+        string description, string housePolicy, string cancellationPolicy, 
+        uint8 houseType, uint256 numGuest, uint256 numBedroom, 
+        uint256 numBed, uint256 numBathroom) public returns (bool success, uint256 newId) {
 
         success = false;
         newId = 0;
 
-        bool succ;
-        uint256 gridId;
-        (succ, gridId) = getGridId(house.latitude, house.longitude);
-        if (!succ) {return;}
-
         /* Smallest houseId is 1 */
         houseId += 1;
 
-        House house; 
+        House storage house; 
 
         house.id = houseId;
 
@@ -194,6 +182,50 @@ contract Houses {
         house.numBed = numBed;
         house.numBathroom = numBathroom;
 
+        /* Add newly created house to storage. */
+        houses[house.id] = house;
+        housesOf[msg.sender].push(house.id);
+
+        /* Logistics */
+        house.active = false;
+
+        success = true;
+        newId = house.id;
+    } 
+
+    /**
+     * Register and list a new house (2).
+     *
+     * @param id The id of the house to continue initializing.
+     * @param hourlyRate The hourly rate of the house.
+     * @param dailyRate The daily rate of the house.
+     * @param utilityFee The utility fee of the house.
+     * @param cleaningFee The cleaning fee of the house.
+     * @param latitude The lattitude of the house, multiplied by 1 million.
+     * @param longitude The longitude of the house, multiplied by 1 million.
+     * @return success Whether the registration was successful.
+     * @return newId Id of the new house. Must be greater than 0 to be considered valid.
+     */
+    function registerHouse2(uint256 id, uint256 hourlyRate, 
+        uint256 dailyRate, uint256 utilityFee, uint256 cleaningFee, 
+        uint256 latitude, uint256 longitude) public returns (bool success, uint256 newId) {
+
+        success = false;
+
+        bool succ;
+        uint256 gridId;
+        (succ, gridId) = getGridId(latitude, longitude);
+        if (!succ) {
+            /* This listing failed. Erase houseId. */
+            //delete houses[id];
+            houseId -= 1;
+            return;
+        }
+
+        House storage house = houses[id];   
+
+        require(house.host == msg.sender);
+
         /* Price */
         house.hourlyRate = hourlyRate;
         house.dailyRate = dailyRate;
@@ -208,9 +240,7 @@ contract Houses {
         house.active = true;
 
         /* Add newly created house to storage. */
-        houses[house.id] = house;
-        housesOf[msg.sender].push(house.id);
-        housesInGrid[gridId].push(house.id);
+        // housesInGrid[gridId].push(house.id);
 
         success = true;
         newId = house.id;

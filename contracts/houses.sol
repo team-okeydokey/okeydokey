@@ -91,6 +91,64 @@ contract Houses {
     }
 
     /**
+     * Modifier for functions only smart contract owner can run.
+     */
+    modifier system() {
+        /* Verify admin. */
+        if (admin != msg.sender) {
+            throw;
+        }
+
+        _;
+    }
+
+    /**
+     * Modifier for functions only house host(owner) can run.
+     *
+     * @param id The id of house being manipulated.
+     */
+    modifier onlyHost(uint256 id) {
+        House storage house = houses[id];   
+        if (!house.valid) {
+            throw;
+        } 
+
+        /* Verify owner. */
+        if (house.host != msg.sender) {
+            throw;
+        }
+
+        _;
+    }
+
+    /**
+     * Modifier for functions only designated admins can run.
+     *
+     * @param id The id of house being manipulated.
+     */
+    modifier onlyAdmins(uint256 id) {
+        House storage house = houses[id];   
+        if (!house.valid) {
+            throw;
+        } 
+
+        /* Search for admin address. */
+        bool found = false;
+        address[] memory admins = house.administrators;
+        for (uint256 i=0; i < admins.length; i++) {
+            if (admins[i] == msg.sender) {
+                found = true;
+            }
+        }
+
+        if (!found) {
+            throw;
+        }
+
+        _;
+    }
+
+    /**
      * Constrctor function.
      *
      * Assign owner.
@@ -303,11 +361,11 @@ contract Houses {
      * @param addrSummary Shortened address of the house.
      * @param addrDirection Instructions on how to find the house.
      * @param description House description, provided by the host.
-     * @return success Whether the registration was successful.
+     * @return success Whether the edit was successful.
      */
     function editHouse1(uint256 id, string houseName, string hostName, 
         string addrFull, string addrSummary, string addrDirection, 
-        string description) public returns (bool success) {
+        string description) onlyAdmins(id) public returns (bool success) {
 
         success = false;
 
@@ -343,18 +401,48 @@ contract Houses {
      * @param numBedroom The number of bedrooms in the house.
      * @param numBed The total number of beds in the house.
      * @param numBathroom The number of bathrooms in the house.
-     * @return success Whether the registration was successful.
+     * @return success Whether the edit was successful.
      */
     function editHouse2(uint256 id, string housePolicy, string cancellationPolicy, 
         uint8 houseType, uint256 numGuest, uint256 numBedroom, 
-        uint256 numBed, uint256 numBathroom) public returns (bool success) {
+        uint256 numBed, uint256 numBathroom) onlyAdmins(id) public returns (bool success) {
 
         success = false;
 
-        House storage house = houses[id]; 
+        /* Prices */
+        bool succ = updateSecondaryInfo(id, housePolicy, cancellationPolicy, 
+                                        houseType, numGuest, numBedroom, 
+                                        numBed, numBathroom);
+        if (!succ) {
+            return;
+        }
+
+        success = true;
+    } 
+
+    /**
+     * Update secondary info for a house listing.
+     *
+     * Helper function for editHouse2. 
+     *
+     * @param id The id of the house to edit.
+     * @param housePolicy Basic house rules set by the host.
+     * @param cancellationPolicy The cancellation policy of the booking.
+     * @param houseType The type of the house.
+     * @param numGuest The number of guests the house can accomodate.
+     * @param numBedroom The number of bedrooms in the house.
+     * @param numBed The total number of beds in the house.
+     * @param numBathroom The number of bathrooms in the house.
+     * @return success Whether the update was successful.
+     */
+    function updateSecondaryInfo(uint256 id, string housePolicy, string cancellationPolicy, 
+        uint8 houseType, uint256 numGuest, uint256 numBedroom, 
+        uint256 numBed, uint256 numBathroom) internal returns (bool success) {
+
+        House storage house = houses[id];  
         if (!house.valid) {
             return;
-        } 
+        }
 
         /* House info */
         house.housePolicy = housePolicy;
@@ -366,7 +454,7 @@ contract Houses {
         house.numBathroom = numBathroom;
 
         success = true;
-    } 
+     }
 
     /**
      * Edit a listed house (3).
@@ -381,20 +469,51 @@ contract Houses {
      * @param cleaningFee The cleaning fee of the house.
      * @param latitude The lattitude of the house, multiplied by 1 million.
      * @param longitude The longitude of the house, multiplied by 1 million.
-     * @return success Whether the registration was successful.
+     * @return success Whether the edit was successful.
      */
-    function editHouse3(uint256 id,  
-        uint256 hourlyRate, uint256 dailyRate, uint256 utilityFee, uint256 cleaningFee, 
-        uint256 latitude, uint256 longitude) public returns (bool success) {
+    // function editHouse3(uint256 id, uint256 hourlyRate, 
+    //     uint256 dailyRate, uint256 utilityFee, uint256 cleaningFee, 
+    //     uint256 latitude, uint256 longitude) onlyAdmins(id) public returns (bool success) {
 
-        success = false;
+    //     success = false;
 
-        bool succ = updateCoordinates(id, latitude, longitude);
-        if (!succ) {
-            return;
-        }
+    //     House storage house = houses[id];   
+    //     if (!house.valid) {
+    //         return;
+    //     }
 
-        House storage house = houses[id];   
+    //     /* Prices */
+    //     bool succ1 = updatePrices(id, hourlyRate, dailyRate, utilityFee, cleaningFee);
+    //     if (!succ1) {
+    //         return;
+    //     }
+
+    //     /* Coordinates */
+    //     bool succ2 = updateCoordinates(id, latitude, longitude);
+    //     if (!succ2) {
+    //         return;
+    //     }
+
+    //     success = true;
+    // } 
+
+    /**
+     * Update prices for a house listing.
+     *
+     * Helper function for editHouse3. 
+     * Currently public due to stack size limitations in EVM.
+     *
+     * @param id The id of the house to edit.
+     * @param hourlyRate The hourly rate of the house.
+     * @param dailyRate The daily rate of the house.
+     * @param utilityFee The utility fee of the house.
+     * @param cleaningFee The cleaning fee of the house.
+     * @return success Whether the update was successful.
+     */
+    function updatePrices(uint256 id, uint256 hourlyRate, uint256 dailyRate, 
+        uint256 utilityFee, uint256 cleaningFee) onlyAdmins(id) public returns (bool success) {
+
+        House storage house = houses[id];  
         if (!house.valid) {
             return;
         }
@@ -406,19 +525,21 @@ contract Houses {
         house.cleaningFee = cleaningFee;
 
         success = true;
-    } 
+     }
 
     /**
      * Update coordinates for a house listing.
      *
      * Helper function for editHouse3. 
+     * Currently public due to stack size limitations in EVM.
      *
      * @param id The id of the house to edit.
      * @param latitude The lattitude of the house, multiplied by 1 million.
      * @param longitude The longitude of the house, multiplied by 1 million.
-     * @return success Whether the registration was successful.
+     * @return success Whether the update was successful.
      */
-     function updateCoordinates(uint256 id, uint256 latitude, uint256 longitude) internal returns (bool success) {
+    function updateCoordinates(uint256 id, uint256 latitude, uint256 longitude) 
+        onlyAdmins(id) public returns (bool success) {
 
         success = false;
 
@@ -430,8 +551,8 @@ contract Houses {
             return;
         }
 
-        /* Fetch new coordinates. */
-        House storage house = houses[id];  
+        /* Fetch previous coordinates. */
+        House memory house = houses[id];  
         if (!house.valid) {
             return;
         }
@@ -447,14 +568,7 @@ contract Houses {
         if (prevGridId != gridId) {
             housesInGrid[gridId].push(house.id);
             /* Erase from previous gridId */
-            uint256[] storage ids = housesInGrid[prevGridId];
-            uint256 toErase;
-            for (uint256 i=0; i < ids.length; i++) {
-                if (ids[i] == house.id) {
-                    toErase = i;
-                }
-            } 
-            delete ids[i];
+            removeFromGridId(prevGridId, house.id);
         }
 
         /* Update location. */
@@ -463,6 +577,29 @@ contract Houses {
 
         success = true;
      }
+
+     /**
+     * Update coordinates for a house listing.
+     *
+     * Helper function for editHouse3. 
+     * Currently public due to stack size limitations in EVM.
+     *
+     * @param prevGridId The id of the grid to erase from.
+     * @param id The id of the house to erase.
+     * @return success Whether the deletion was successful.
+     */
+    function removeFromGridId(uint256 prevGridId, uint256 id) internal returns (bool success) {
+        success = false;
+        uint256[] storage ids = housesInGrid[prevGridId];
+        uint256 toErase;
+        for (uint256 i=0; i < ids.length; i++) {
+            if (ids[i] == id) {
+                toErase = i;
+            }
+        } 
+        delete ids[toErase];
+        success = true;
+    }
 
     /**
      * Fetch house info (1).
@@ -679,7 +816,7 @@ contract Houses {
     /**
      * Self destruct.
      */
-    function kill() public { 
+    function kill() system public { 
         if (msg.sender == admin) selfdestruct(admin); 
     }
 

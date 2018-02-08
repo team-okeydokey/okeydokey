@@ -1,18 +1,18 @@
 {
   "contractName": "Devices",
   "abi": [],
-  "bytecode": "0x60606040523415600e57600080fd5b603580601b6000396000f3006060604052600080fd00a165627a7a723058206b33d11fe8ead313af62d2f4e493914efa693d326535aba4271f3ab231ee3e160029",
-  "deployedBytecode": "0x6060604052600080fd00a165627a7a723058206b33d11fe8ead313af62d2f4e493914efa693d326535aba4271f3ab231ee3e160029",
-  "sourceMap": "26:21:1:-;;;;;;;;;;;;;;;;;",
-  "deployedSourceMap": "26:21:1:-;;;;;",
-  "source": "pragma solidity ^0.4.19;\n\ncontract Devices {\n\n}\n",
+  "bytecode": "0x60606040523415600e57600080fd5b603580601b6000396000f3006060604052600080fd00a165627a7a72305820bee9bfec36c57ebe2a11623055c4c953e8797b1b5843f4774ea30d26255633bf0029",
+  "deployedBytecode": "0x6060604052600080fd00a165627a7a72305820bee9bfec36c57ebe2a11623055c4c953e8797b1b5843f4774ea30d26255633bf0029",
+  "sourceMap": "26:1061:0:-;;;;;;;;;;;;;;;;;",
+  "deployedSourceMap": "26:1061:0:-;;;;;",
+  "source": "pragma solidity ^0.4.19;\n\ncontract Devices {\n\n\t/**\n     * Reinitialize values dependant on other functions.\n     *\n     * @param _okeyDokeyAddress The address of main application contract.\n     * @return success Whether the reinitialization was successful.\n     */\n    // function initializeContracts(address _okeyDokeyAddress) public returns (bool success) {\n    //     require(msg.sender == admin);\n    //     require(_okeyDokeyAddress != 0);\n    //     require(_okeyDokeyAddress != address(this));\n\n    //     okeyDokeyAddress = _okeyDokeyAddress;\n    //     okeyDokey = OkeyDokey(okeyDokeyAddress);\n\n    //     // devicesAddress = okeyDokey.getAddress(2);\n    //     // devices = Devices(devicesAddress);\n\n    //     // reservationsAddress = okeyDokey.getAddress(3);\n    //     // reservations = Reservations(reservationsAddress);\n\n    //     // require(devicesAddress != 0x0);\n    //     // require(devicesAddress != address(this));\n\n    //     // require(reservationsAddress != 0x0);\n    //     // require(reservationsAddress != address(this));\n\n    //     return true;\n    // }\n\n}\n",
   "sourcePath": "/home/seongmin/okeydokey/contracts/devices.sol",
   "ast": {
     "attributes": {
       "absolutePath": "/home/seongmin/okeydokey/contracts/devices.sol",
       "exportedSymbols": {
         "Devices": [
-          59
+          2
         ]
       }
     },
@@ -26,9 +26,9 @@
             ".19"
           ]
         },
-        "id": 58,
+        "id": 1,
         "name": "PragmaDirective",
-        "src": "0:24:1"
+        "src": "0:24:0"
       },
       {
         "attributes": {
@@ -42,22 +42,22 @@
           "documentation": null,
           "fullyImplemented": true,
           "linearizedBaseContracts": [
-            59
+            2
           ],
           "name": "Devices",
           "nodes": [
             null
           ],
-          "scope": 60
+          "scope": 3
         },
-        "id": 59,
+        "id": 2,
         "name": "ContractDefinition",
-        "src": "26:21:1"
+        "src": "26:1061:0"
       }
     ],
-    "id": 60,
+    "id": 3,
     "name": "SourceUnit",
-    "src": "0:48:1"
+    "src": "0:1088:0"
   },
   "compiler": {
     "name": "solc",
@@ -65,5 +65,5 @@
   },
   "networks": {},
   "schemaVersion": "1.0.1",
-  "updatedAt": "2018-02-08T16:23:55.475Z"
+  "updatedAt": "2018-02-08T18:43:37.333Z"
 }

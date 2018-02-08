@@ -2,17 +2,8 @@ pragma solidity ^0.4.19;
 
 contract OkeyDokey {
     /** Get addresses of other contracts. */
-    function getAddress(uint16) public view returns (address);
+    // function getAddress(uint16) public view returns (address);
 }
-
-
-// contract Devices {
-
-// }
-
-// contract Reservations {
-
-// }
 
 contract Houses {
 
@@ -36,18 +27,6 @@ contract Houses {
 
     /** Instance of Devices contract. */
     OkeyDokey private okeyDokey;
-
-    // /** Address of Devices contract. */
-    // address private devicesAddress;
-
-    // /** Instance of Devices contract. */
-    // Devices private devices;
-
-    /** Address of Reservations contract. */
-    // address private reservationsAddress;
-
-    /** Instance of Reservations contract. */
-    // Reservations private reservations;
 
     /** Structure of a house. */
     struct House {
@@ -172,18 +151,6 @@ contract Houses {
         okeyDokeyAddress = _okeyDokeyAddress;
         okeyDokey = OkeyDokey(okeyDokeyAddress);
 
-        // devicesAddress = okeyDokey.getAddress(2);
-        // devices = Devices(devicesAddress);
-
-        // reservationsAddress = okeyDokey.getAddress(3);
-        // reservations = Reservations(reservationsAddress);
-
-        // require(devicesAddress != 0x0);
-        // require(devicesAddress != address(this));
-
-        // require(reservationsAddress != 0x0);
-        // require(reservationsAddress != address(this));
-
         return true;
     }
 
@@ -212,14 +179,13 @@ contract Houses {
         /* Smallest houseId is 1 */
         houseId += 1;
 
-        House storage house; 
+        House memory house; 
 
         house.id = houseId;
 
         /* Owner info */
         house.host = msg.sender;
         house.hostName = hostName;
-        house.administrators.push(msg.sender);
 
         /* House info */
         house.houseName = houseName;
@@ -265,9 +231,7 @@ contract Houses {
         newId = 0;
 
         House storage house = houses[id];   
-        if (!house.valid) {
-            return;
-        } else if (house.host == msg.sender) {
+        if (house.host != msg.sender) {
             return;
         }
 
@@ -321,9 +285,7 @@ contract Houses {
         }
 
         House storage house = houses[id];   
-        if (!house.valid) {
-            return;
-        } else if (house.host != msg.sender) {
+        if (house.host != msg.sender) {
             return;
         }
 
@@ -340,6 +302,9 @@ contract Houses {
         /* Logistics */
         house.active = true;
         house.valid = true;
+
+        /* Add host as administrator. */
+        addAdministrator(house.id, msg.sender);
 
         /* Add newly created house to storage. */
         housesInGrid[gridId].push(house.id);
@@ -722,7 +687,7 @@ contract Houses {
     /**
      * Setter for house name.
      *
-     * @param id If of house to edit.
+     * @param id Id of house to edit.
      * @param houseName New name of house.
      * @return success Whether the operation was successful.
      */
@@ -740,7 +705,7 @@ contract Houses {
     /**
      * Getter for house name.
      *
-     * @param id If of house to query.
+     * @param id Id of house to query.
      * @return success Whether the query was successful.
      * @return houseName Name of the house.
      */
@@ -758,7 +723,7 @@ contract Houses {
     /**
      * Setter for host name.
      *
-     * @param id If of house to edit.
+     * @param id Id of house to edit.
      * @param hostName New name of host.
      * @return success Whether the operation was successful.
      */
@@ -776,7 +741,7 @@ contract Houses {
     /**
      * Getter for host name.
      *
-     * @param id If of house to query.
+     * @param id Id of house to query.
      * @return success Whether the query was successful.
      * @return hostName Name of the house.
      */
@@ -788,6 +753,76 @@ contract Houses {
             success = true;
             hostName = house.hostName;
             return;
+        }
+    }
+
+    /**
+     * Add administrator to house.
+     *
+     * @param id Id of house to edit.
+     * @param newAdmin The address of new admin.
+     * @return success Whether the operation was successful.
+     */
+    function addAdministrator(uint256 id, address newAdmin) 
+        onlyHost(id) public returns (bool success) {
+
+        success = false;
+
+        House storage house = houses[id];
+        if (house.valid) {
+            
+            bool found = false;
+            uint256 index = 0;
+            address[] memory admins = house.administrators;
+
+            /* Search for previous entry */
+            for (uint256 i=0; i < admins.length; i++) {
+                if (admins[i] == newAdmin) {
+                    found = true;
+                    index = i;
+                }
+            }
+
+            if (!found) {
+                house.administrators.push(newAdmin);
+                success = true;
+                return;
+            }
+        }
+    }
+
+    /**
+     * Remove administrator from house.
+     *
+     * @param id Id of house to query.
+     * @param toDelete The address of admin to delete.
+     * @return success Whether the operation was successful.
+     */
+    function removeAdministrator(uint256 id, address toDelete) 
+        onlyHost(id) public returns (bool success) {
+
+        success = false;
+
+        House storage house = houses[id];
+        if (house.valid) {
+
+            bool found = false;
+            uint256 index = 0;
+            address[] memory admins = house.administrators;
+
+            /* Search for previous entry */
+            for (uint256 i=0; i < admins.length; i++) {
+                if (admins[i] == toDelete) {
+                    found = true;
+                    index = i;
+                }
+            }
+
+            if (found) {
+                delete admins[index];
+                success = true;
+                return;
+            }
         }
     }
 

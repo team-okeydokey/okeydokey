@@ -87,6 +87,7 @@ contract Houses {
 
         /* Logistics */
         bool active;
+        bool valid;
     }
 
     /**
@@ -188,6 +189,7 @@ contract Houses {
 
         /* Logistics */
         house.active = false;
+        house.valid = false;
 
         success = true;
         newId = house.id;
@@ -238,6 +240,7 @@ contract Houses {
 
         /* Logistics */
         house.active = true;
+        house.valid = true;
 
         /* Add newly created house to storage. */
         housesInGrid[gridId].push(house.id);
@@ -245,6 +248,78 @@ contract Houses {
         success = true;
         newId = house.id;
     } 
+
+    /**
+     * Setter for house name.
+     *
+     * @param id If of house to edit.
+     * @param houseName New name of house.
+     * @return success Whether the operation was successful.
+     */
+    function setHouseName(uint256 id, string houseName) public returns (bool success) {
+        success = false;
+
+        House memory house = houses[id];
+        if (house.valid) {
+            house.houseName = houseName;
+            success = true;
+            return;
+        }
+    }
+
+    /**
+     * Getter for house name.
+     *
+     * @param id If of house to query.
+     * @return success Whether the query was successful.
+     * @return houseName Name of the house.
+     */
+    function getHouseName(uint256 id) public view returns (bool success, string houseName) {
+        success = false;
+
+        House memory house = houses[id];
+        if (house.valid) {
+            success = true;
+            houseName = house.houseName;
+            return;
+        }
+    }
+
+    /**
+     * Setter for host name.
+     *
+     * @param id If of house to edit.
+     * @param hostName New name of host.
+     * @return success Whether the operation was successful.
+     */
+    function setHostName(uint256 id, string hostName) public returns (bool success) {
+        success = false;
+
+        House memory house = houses[id];
+        if (house.valid) {
+            house.hostName = hostName;
+            success = true;
+            return;
+        }
+    }
+
+    /**
+     * Getter for host name.
+     *
+     * @param id If of house to query.
+     * @return success Whether the query was successful.
+     * @return hostName Name of the house.
+     */
+    function getHostName(uint256 id) public view returns (bool success, string hostName) {
+        success = false;
+
+        House memory house = houses[id];
+        if (house.valid) {
+            success = true;
+            hostName = house.hostName;
+            return;
+        }
+    }
 
     /**
      * Calculate grid id from coordinates.

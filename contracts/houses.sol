@@ -207,8 +207,11 @@ contract Houses {
         newId = 0;
 
         House storage house = houses[id];   
-
-        require(house.host == msg.sender);
+        if (!house.valid) {
+            return;
+        } else if (house.host == msg.sender) {
+            return;
+        }
 
         /* House info */
         house.housePolicy = housePolicy;
@@ -228,7 +231,7 @@ contract Houses {
     } 
 
     /**
-     * Register and list a new house (2).
+     * Register and list a new house (3).
      *
      * Divided into three functions because 
      * Solidity limits the number of local variables to 16.
@@ -260,8 +263,11 @@ contract Houses {
         }
 
         House storage house = houses[id];   
-
-        require(house.host == msg.sender);
+        if (!house.valid) {
+            return;
+        } else if (house.host != msg.sender) {
+            return;
+        }
 
         /* Price */
         house.hourlyRate = hourlyRate;
@@ -283,6 +289,180 @@ contract Houses {
         success = true;
         newId = house.id;
     } 
+
+    /**
+     * Edit a listed house (1).
+     *
+     * Divided into three functions because 
+     * Solidity limits the number of local variables to 16.
+     *
+     * @param id The id of the house to edit.
+     * @param houseName The name of the house. Also used as the title of listing.
+     * @param hostName The name of the host.
+     * @param addrFull Full address of the house.
+     * @param addrSummary Shortened address of the house.
+     * @param addrDirection Instructions on how to find the house.
+     * @param description House description, provided by the host.
+     * @return success Whether the registration was successful.
+     */
+    function editHouse1(uint256 id, string houseName, string hostName, 
+        string addrFull, string addrSummary, string addrDirection, 
+        string description) public returns (bool success) {
+
+        success = false;
+
+        House storage house = houses[id]; 
+        if (!house.valid) {
+            return;
+        } 
+
+        /* Owner info */
+        house.hostName = hostName;
+
+        /* House info */
+        house.houseName = houseName;
+        house.addrFull = addrFull;
+        house.addrSummary = addrSummary;
+        house.addrDirection = addrDirection;
+        house.description = description;
+
+        success = true;
+    } 
+
+    /**
+     * Edit a listed house (2).
+     *
+     * Divided into three functions because 
+     * Solidity limits the number of local variables to 16.
+     *
+     * @param id The id of the house to edit.
+     * @param housePolicy Basic house rules set by the host.
+     * @param cancellationPolicy The cancellation policy of the booking.
+     * @param houseType The type of the house.
+     * @param numGuest The number of guests the house can accomodate.
+     * @param numBedroom The number of bedrooms in the house.
+     * @param numBed The total number of beds in the house.
+     * @param numBathroom The number of bathrooms in the house.
+     * @return success Whether the registration was successful.
+     */
+    function editHouse2(uint256 id, string housePolicy, string cancellationPolicy, 
+        uint8 houseType, uint256 numGuest, uint256 numBedroom, 
+        uint256 numBed, uint256 numBathroom) public returns (bool success) {
+
+        success = false;
+
+        House storage house = houses[id]; 
+        if (!house.valid) {
+            return;
+        } 
+
+        /* House info */
+        house.housePolicy = housePolicy;
+        house.cancellationPolicy = cancellationPolicy;
+        house.houseType = houseType;
+        house.numGuest = numGuest;
+        house.numBedroom = numBedroom;
+        house.numBed = numBed;
+        house.numBathroom = numBathroom;
+
+        success = true;
+    } 
+
+    /**
+     * Edit a listed house (3).
+     *
+     * Divided into three functions because 
+     * Solidity limits the number of local variables to 16.
+     *
+     * @param id The id of the house to edit.
+     * @param hourlyRate The hourly rate of the house.
+     * @param dailyRate The daily rate of the house.
+     * @param utilityFee The utility fee of the house.
+     * @param cleaningFee The cleaning fee of the house.
+     * @param latitude The lattitude of the house, multiplied by 1 million.
+     * @param longitude The longitude of the house, multiplied by 1 million.
+     * @return success Whether the registration was successful.
+     */
+    function editHouse3(uint256 id,  
+        uint256 hourlyRate, uint256 dailyRate, uint256 utilityFee, uint256 cleaningFee, 
+        uint256 latitude, uint256 longitude) public returns (bool success) {
+
+        success = false;
+
+        bool succ = updateCoordinates(id, latitude, longitude);
+        if (!succ) {
+            return;
+        }
+
+        House storage house = houses[id];   
+        if (!house.valid) {
+            return;
+        }
+
+        /* Price */
+        house.hourlyRate = hourlyRate;
+        house.dailyRate = dailyRate;
+        house.utilityFee = utilityFee;
+        house.cleaningFee = cleaningFee;
+
+        success = true;
+    } 
+
+    /**
+     * Update coordinates for a house listing.
+     *
+     * Helper function for editHouse3. 
+     *
+     * @param id The id of the house to edit.
+     * @param latitude The lattitude of the house, multiplied by 1 million.
+     * @param longitude The longitude of the house, multiplied by 1 million.
+     * @return success Whether the registration was successful.
+     */
+     function updateCoordinates(uint256 id, uint256 latitude, uint256 longitude) internal returns (bool success) {
+
+        success = false;
+
+        /* Check new coordinates. */
+        bool succ;
+        uint256 gridId;
+        (succ, gridId) = getGridId(latitude, longitude);
+        if (!succ) {
+            return;
+        }
+
+        /* Fetch new coordinates. */
+        House storage house = houses[id];  
+        if (!house.valid) {
+            return;
+        }
+
+        bool prevSucc;
+        uint256 prevGridId;
+        (prevSucc, prevGridId) = getGridId(house.latitude, house.longitude);
+        if (!prevSucc) {
+            return;
+        }
+
+        /* Add newly created house to storage. */
+        if (prevGridId != gridId) {
+            housesInGrid[gridId].push(house.id);
+            /* Erase from previous gridId */
+            uint256[] storage ids = housesInGrid[prevGridId];
+            uint256 toErase;
+            for (uint256 i=0; i < ids.length; i++) {
+                if (ids[i] == house.id) {
+                    toErase = i;
+                }
+            } 
+            delete ids[i];
+        }
+
+        /* Update location. */
+        house.latitude = latitude;
+        house.longitude = longitude;
+
+        success = true;
+     }
 
     /**
      * Fetch house info (1).

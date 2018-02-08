@@ -74,9 +74,7 @@ contract Houses {
      */
     modifier system() {
         /* Verify admin. */
-        if (admin != msg.sender) {
-            throw;
-        }
+        require(admin == msg.sender);
 
         _;
     }
@@ -87,15 +85,11 @@ contract Houses {
      * @param id The id of house being manipulated.
      */
     modifier onlyHost(uint256 id) {
-        House storage house = houses[id];   
-        if (!house.valid) {
-            throw;
-        } 
+        House memory house = houses[id];   
+        require(house.valid);
 
         /* Verify owner. */
-        if (house.host != msg.sender) {
-            throw;
-        }
+        require(house.host == msg.sender);
 
         _;
     }
@@ -106,10 +100,8 @@ contract Houses {
      * @param id The id of house being manipulated.
      */
     modifier onlyAdmins(uint256 id) {
-        House storage house = houses[id];   
-        if (!house.valid) {
-            throw;
-        } 
+        House memory house = houses[id];   
+        require(house.valid);
 
         /* Search for admin address. */
         bool found = false;
@@ -120,9 +112,7 @@ contract Houses {
             }
         }
 
-        if (!found) {
-            throw;
-        }
+        require(found);
 
         _;
     }

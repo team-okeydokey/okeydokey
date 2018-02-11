@@ -373,6 +373,24 @@ contract Houses {
     }
 
     /**
+     * Getter for ipfs hash of house.
+     *
+     * @param id Id of house to query.
+     * @return success Whether the query was successful.
+     * @return ipfsHash Hash of the house within the ipfs network.
+     */
+    function getIpfsHash(uint256 id) public view returns (bool success, bytes ipfsHash) {
+        success = false;
+
+        House memory house = houses[id];
+        if (house.valid) {
+            success = true;
+            ipfsHash = house.ipfsHash;
+            return;
+        }
+    }
+
+    /**
      * Calculate grid id from coordinates.
      *
      * @param latitude The lattitude of the house, multiplied by 1 million.
@@ -380,7 +398,7 @@ contract Houses {
      * @return success Whether the coordinates were valid.
      * @return gridId Id within the Earth's grid.
      */
-    function getGridId(uint256 latitude, uint256 longitude) public returns (bool success, uint256 gridId) {
+    function getGridId(uint256 latitude, uint256 longitude) public pure returns (bool success, uint256 gridId) {
         success = false;
 
         success = true;

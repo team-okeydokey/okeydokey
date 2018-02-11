@@ -3,8 +3,8 @@
   "abi": [],
   "bytecode": "0x60606040523415600e57600080fd5b603580601b6000396000f3006060604052600080fd00a165627a7a723058202965821830f07cb5f1f390b680a979ae2360afc7afe9582f4d2ff998dd0380230029",
   "deployedBytecode": "0x6060604052600080fd00a165627a7a723058202965821830f07cb5f1f390b680a979ae2360afc7afe9582f4d2ff998dd0380230029",
-  "sourceMap": "26:21:2:-;;;;;;;;;;;;;;;;;",
-  "deployedSourceMap": "26:21:2:-;;;;;",
+  "sourceMap": "26:21:1:-;;;;;;;;;;;;;;;;;",
+  "deployedSourceMap": "26:21:1:-;;;;;",
   "source": "pragma solidity ^0.4.19;\n\ncontract Reviews {\n\n}\n",
   "sourcePath": "/home/seongmin/okeydokey/contracts/reviews.sol",
   "ast": {
@@ -12,7 +12,7 @@
       "absolutePath": "/home/seongmin/okeydokey/contracts/reviews.sol",
       "exportedSymbols": {
         "Reviews": [
-          1756
+          6
         ]
       }
     },
@@ -26,9 +26,9 @@
             ".19"
           ]
         },
-        "id": 1755,
+        "id": 5,
         "name": "PragmaDirective",
-        "src": "0:24:2"
+        "src": "0:24:1"
       },
       {
         "attributes": {
@@ -42,28 +42,39 @@
           "documentation": null,
           "fullyImplemented": true,
           "linearizedBaseContracts": [
-            1756
+            6
           ],
           "name": "Reviews",
           "nodes": [
             null
           ],
-          "scope": 1757
+          "scope": 7
         },
-        "id": 1756,
+        "id": 6,
         "name": "ContractDefinition",
-        "src": "26:21:2"
+        "src": "26:21:1"
       }
     ],
-    "id": 1757,
+    "id": 7,
     "name": "SourceUnit",
-    "src": "0:48:2"
+    "src": "0:48:1"
   },
   "compiler": {
     "name": "solc",
     "version": "0.4.19+commit.c4cbbb05.Emscripten.clang"
   },
-  "networks": {},
+  "networks": {
+    "1518392076947": {
+      "events": {},
+      "links": {},
+      "address": "0x85f5f4640580d34b4c266df69d24cc31c8ce114a"
+    },
+    "1518392409849": {
+      "events": {},
+      "links": {},
+      "address": "0xe171a671b7e0daec487297d39df6651942c32cb9"
+    }
+  },
   "schemaVersion": "1.0.1",
-  "updatedAt": "2018-02-08T19:05:29.150Z"
+  "updatedAt": "2018-02-11T23:40:24.668Z"
 }

@@ -64,117 +64,12 @@
     "version": "0.4.19+commit.c4cbbb05.Emscripten.clang"
   },
   "networks": {
-    "1518394343126": {
-      "events": {},
-      "links": {},
-      "address": "0xa6f8903b71b977f88068dd88dd8f57e618abd554"
-    },
-    "1518394559505": {
-      "events": {},
-      "links": {},
-      "address": "0xb041853634b257159d025fd0767d41a93fa1f670"
-    },
-    "1518395067519": {
-      "events": {},
-      "links": {},
-      "address": "0x7054a1bc26c6f4495b6c797c12433605fe29a2a1"
-    },
-    "1518396122453": {
-      "events": {},
-      "links": {},
-      "address": "0x8a2c9a5337e04d65e8412da289fa4535b6a412d1"
-    },
-    "1518396763458": {
-      "events": {},
-      "links": {},
-      "address": "0xa3205695f966ecbbb432bb1d4ce20771fa7771b3"
-    },
-    "1518396817326": {
-      "events": {},
-      "links": {},
-      "address": "0x61ae7860bdc8a7a69367d50007946fd6e8faadd4"
-    },
-    "1518403379163": {
-      "events": {},
-      "links": {},
-      "address": "0x7e50d583ba7a7bdebd98e4e751a24f4ab91b9ee3"
-    },
-    "1518403766312": {
-      "events": {},
-      "links": {},
-      "address": "0x85a68b2ce3ec3b588b99bec2fb4a669b8196d1f7"
-    },
-    "1518403802621": {
-      "events": {},
-      "links": {},
-      "address": "0x5c506c5d0da469ab57892485dd3cd2bccbe099d8"
-    },
-    "1518404862101": {
-      "events": {},
-      "links": {},
-      "address": "0xcd8ff0c35ccb46f48d59a75d998cae85ab71bd87"
-    },
-    "1518405168113": {
-      "events": {},
-      "links": {},
-      "address": "0xcd8ff0c35ccb46f48d59a75d998cae85ab71bd87"
-    },
-    "1518459401986": {
-      "events": {},
-      "links": {},
-      "address": "0x7eb5dce815ccf5e1fffb82ac71c81f78a6762fba"
-    },
-    "1518459600018": {
-      "events": {},
-      "links": {},
-      "address": "0x7eb5dce815ccf5e1fffb82ac71c81f78a6762fba"
-    },
-    "1518459738850": {
-      "events": {},
-      "links": {},
-      "address": "0x7eb5dce815ccf5e1fffb82ac71c81f78a6762fba"
-    },
-    "1518459776034": {
-      "events": {},
-      "links": {},
-      "address": "0x7eb5dce815ccf5e1fffb82ac71c81f78a6762fba"
-    },
-    "1518460594376": {
-      "events": {},
-      "links": {},
-      "address": "0x7eb5dce815ccf5e1fffb82ac71c81f78a6762fba"
-    },
-    "1518460621189": {
-      "events": {},
-      "links": {},
-      "address": "0x7eb5dce815ccf5e1fffb82ac71c81f78a6762fba"
-    },
-    "1518460894766": {
-      "events": {},
-      "links": {},
-      "address": "0x7eb5dce815ccf5e1fffb82ac71c81f78a6762fba"
-    },
-    "1518460949254": {
-      "events": {},
-      "links": {},
-      "address": "0x7eb5dce815ccf5e1fffb82ac71c81f78a6762fba"
-    },
-    "1518461298663": {
-      "events": {},
-      "links": {},
-      "address": "0x7eb5dce815ccf5e1fffb82ac71c81f78a6762fba"
-    },
-    "1518461392104": {
-      "events": {},
-      "links": {},
-      "address": "0x7eb5dce815ccf5e1fffb82ac71c81f78a6762fba"
-    },
-    "1518461446598": {
+    "1518470309173": {
       "events": {},
       "links": {},
       "address": "0x7eb5dce815ccf5e1fffb82ac71c81f78a6762fba"
     }
   },
   "schemaVersion": "1.0.1",
-  "updatedAt": "2018-02-12T18:50:50.768Z"
+  "updatedAt": "2018-02-12T21:18:35.592Z"
 }

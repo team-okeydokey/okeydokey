@@ -144,7 +144,7 @@ contract Houses {
     /**
      * Register and list a new house.
      *
-     * @param ipfsHash Hash of JSON file within the ipfs network.
+     * @param ipfsHash Ipfs identifier of JSON file containing house info.
      * @param latitude The lattitude of the house, multiplied by 1 million.
      * @param longitude The longitude of the house, multiplied by 1 million.
      * @return success Whether the registration was successful.
@@ -202,7 +202,7 @@ contract Houses {
      * Edit a listed house.
      *
      * @param id The id of the house to edit.
-     * @param ipfsHash Hash of JSON file within the ipfs network.
+     * @param ipfsHash Ipfs identifier of JSON file containing house info.
      * @param latitude The lattitude of the house, multiplied by 1 million.
      * @param longitude The longitude of the house, multiplied by 1 million.
      * @return success Whether the edit was successful.
@@ -377,7 +377,7 @@ contract Houses {
      *
      * @param id Id of house to query.
      * @return success Whether the query was successful.
-     * @return ipfsHash Hash of the house within the ipfs network.
+     * @return ipfsHash Ipfs identifier of JSON file containing house info.
      */
     function getIpfsHash(uint256 id) public view returns (bool success, bytes ipfsHash) {
         success = false;

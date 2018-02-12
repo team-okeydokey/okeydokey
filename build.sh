@@ -1,7 +1,22 @@
-# Launch vm.
-# killall node /usr/local/bin/ganache-cli
+# Kill running instance of vm.
 pkill -f ganache-cli
-ganache-cli --defaultBalanceEther=1000 --gasLimit=4600000 &
+
+# Launch vm in a new window.
+if [[ "$OSTYPE" == "linux-gnu" ]]; then
+        x-terminal-emulator -e "ganache-cli" &
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+        osascript -e 'tell application "Terminal" to do script "ganache-cli"' &
+# elif [[ "$OSTYPE" == "cygwin" ]]; then
+
+# elif [[ "$OSTYPE" == "msys" ]]; then
+
+# elif [[ "$OSTYPE" == "win32" ]]; then
+
+# elif [[ "$OSTYPE" == "freebsd"* ]]; then
+
+# else
+        # Unknown.
+fi
 
 # Wait.
 sleep 1

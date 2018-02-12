@@ -1,6 +1,10 @@
 # OkeyDokey
 Smart contracts for an automated hotel marketplace
 
+<p align="center">
+  <img align="center" src="img/logo.png" width="532" height="184" alt="logo.png"/>
+</p>
+
 # Dependancies
 Install truffle:
 ```bash

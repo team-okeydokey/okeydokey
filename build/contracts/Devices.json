@@ -1,15 +1,15 @@
 {
   "contractName": "Devices",
   "abi": [],
-  "bytecode": "0x60606040523415600e57600080fd5b603580601b6000396000f3006060604052600080fd00a165627a7a723058203de36afaeccdbece84012a3efcf2f0e979bdd31ee2ad692f858fe526c08ff5570029",
-  "deployedBytecode": "0x6060604052600080fd00a165627a7a723058203de36afaeccdbece84012a3efcf2f0e979bdd31ee2ad692f858fe526c08ff5570029",
+  "bytecode": "0x60606040523415600e57600080fd5b603580601b6000396000f3006060604052600080fd00a165627a7a723058209749ce5d4a1bb5f4ec0c1f00e87b6fea28e569b086726839ca2270f91590aada0029",
+  "deployedBytecode": "0x6060604052600080fd00a165627a7a723058209749ce5d4a1bb5f4ec0c1f00e87b6fea28e569b086726839ca2270f91590aada0029",
   "sourceMap": "48:1061:0:-;;;;;;;;;;;;;;;;;",
   "deployedSourceMap": "48:1061:0:-;;;;;",
   "source": "pragma solidity ^0.4.19;\n\ncontract Houses {\n}\n\n\ncontract Devices {\n\n\t/**\n     * Reinitialize values dependant on other functions.\n     *\n     * @param _okeyDokeyAddress The address of main application contract.\n     * @return success Whether the reinitialization was successful.\n     */\n    // function initializeContracts(address _okeyDokeyAddress) public returns (bool success) {\n    //     require(msg.sender == admin);\n    //     require(_okeyDokeyAddress != 0);\n    //     require(_okeyDokeyAddress != address(this));\n\n    //     okeyDokeyAddress = _okeyDokeyAddress;\n    //     okeyDokey = OkeyDokey(okeyDokeyAddress);\n\n    //     // devicesAddress = okeyDokey.getAddress(2);\n    //     // devices = Devices(devicesAddress);\n\n    //     // reservationsAddress = okeyDokey.getAddress(3);\n    //     // reservations = Reservations(reservationsAddress);\n\n    //     // require(devicesAddress != 0x0);\n    //     // require(devicesAddress != address(this));\n\n    //     // require(reservationsAddress != 0x0);\n    //     // require(reservationsAddress != address(this));\n\n    //     return true;\n    // }\n\n}\n",
-  "sourcePath": "/home/seongmin/okeydokey/contracts/devices.sol",
+  "sourcePath": "/Users/seongmin/okeydokey/contracts/devices.sol",
   "ast": {
     "attributes": {
-      "absolutePath": "/home/seongmin/okeydokey/contracts/devices.sol",
+      "absolutePath": "/Users/seongmin/okeydokey/contracts/devices.sol",
       "exportedSymbols": {
         "Devices": [
           3
@@ -140,8 +140,23 @@
       "events": {},
       "links": {},
       "address": "0xb2efaad0cc11e4a4c7f3242ad6b24f258cba8f0e"
+    },
+    "1518403379163": {
+      "events": {},
+      "links": {},
+      "address": "0x37223998e84de203cc44f243cb21009bb2b823bf"
+    },
+    "1518403766312": {
+      "events": {},
+      "links": {},
+      "address": "0xb78e1507c7ef19302a97ab0e92274f110573889e"
+    },
+    "1518403802621": {
+      "events": {},
+      "links": {},
+      "address": "0x2c13753c6b669bda2d8a12e202aefe07623b9afd"
     }
   },
   "schemaVersion": "1.0.1",
-  "updatedAt": "2018-02-12T00:53:41.237Z"
+  "updatedAt": "2018-02-12T02:50:07.587Z"
 }

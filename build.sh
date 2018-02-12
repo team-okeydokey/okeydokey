@@ -4,8 +4,10 @@ pkill -f ganache-cli
 # Launch vm in a new window.
 if [[ "$OSTYPE" == "linux-gnu" ]]; then
         x-terminal-emulator -e "ganache-cli" &
+
 elif [[ "$OSTYPE" == "darwin"* ]]; then
         osascript -e 'tell application "Terminal" to do script "ganache-cli"' &
+
 # elif [[ "$OSTYPE" == "cygwin" ]]; then
 
 # elif [[ "$OSTYPE" == "msys" ]]; then
@@ -25,4 +27,5 @@ sleep 1
 truffle migrate
 
 # Copy json abi files to okdkjs.
-find ./build/contracts/ ! -name Migrations.json -exec cp -t ../okdkjs/lib/contracts/ {} +
+# find ./build/contracts/ ! -name Migrations.json -exec cp -t ../okdkjs/lib/contracts/ {} +
+rsync -r --exclude='Migrations.json' ./build/contracts/ ../okdkjs/lib/contracts/

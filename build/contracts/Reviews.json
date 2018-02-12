@@ -3,8 +3,8 @@
   "abi": [],
   "bytecode": "0x60606040523415600e57600080fd5b603580601b6000396000f3006060604052600080fd00a165627a7a723058202965821830f07cb5f1f390b680a979ae2360afc7afe9582f4d2ff998dd0380230029",
   "deployedBytecode": "0x6060604052600080fd00a165627a7a723058202965821830f07cb5f1f390b680a979ae2360afc7afe9582f4d2ff998dd0380230029",
-  "sourceMap": "26:21:1:-;;;;;;;;;;;;;;;;;",
-  "deployedSourceMap": "26:21:1:-;;;;;",
+  "sourceMap": "26:21:2:-;;;;;;;;;;;;;;;;;",
+  "deployedSourceMap": "26:21:2:-;;;;;",
   "source": "pragma solidity ^0.4.19;\n\ncontract Reviews {\n\n}\n",
   "sourcePath": "/home/seongmin/okeydokey/contracts/reviews.sol",
   "ast": {
@@ -12,7 +12,7 @@
       "absolutePath": "/home/seongmin/okeydokey/contracts/reviews.sol",
       "exportedSymbols": {
         "Reviews": [
-          6
+          105
         ]
       }
     },
@@ -26,9 +26,9 @@
             ".19"
           ]
         },
-        "id": 5,
+        "id": 104,
         "name": "PragmaDirective",
-        "src": "0:24:1"
+        "src": "0:24:2"
       },
       {
         "attributes": {
@@ -42,39 +42,39 @@
           "documentation": null,
           "fullyImplemented": true,
           "linearizedBaseContracts": [
-            6
+            105
           ],
           "name": "Reviews",
           "nodes": [
             null
           ],
-          "scope": 7
+          "scope": 106
         },
-        "id": 6,
+        "id": 105,
         "name": "ContractDefinition",
-        "src": "26:21:1"
+        "src": "26:21:2"
       }
     ],
-    "id": 7,
+    "id": 106,
     "name": "SourceUnit",
-    "src": "0:48:1"
+    "src": "0:48:2"
   },
   "compiler": {
     "name": "solc",
     "version": "0.4.19+commit.c4cbbb05.Emscripten.clang"
   },
   "networks": {
-    "1518392076947": {
+    "1518394343126": {
       "events": {},
       "links": {},
-      "address": "0x85f5f4640580d34b4c266df69d24cc31c8ce114a"
+      "address": "0xa6f8903b71b977f88068dd88dd8f57e618abd554"
     },
-    "1518392409849": {
+    "1518394559505": {
       "events": {},
       "links": {},
-      "address": "0xe171a671b7e0daec487297d39df6651942c32cb9"
+      "address": "0xb041853634b257159d025fd0767d41a93fa1f670"
     }
   },
   "schemaVersion": "1.0.1",
-  "updatedAt": "2018-02-11T23:40:24.668Z"
+  "updatedAt": "2018-02-12T00:16:06.800Z"
 }

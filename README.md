@@ -23,3 +23,5 @@ To build and deploy on local ganache test network:
 chmod +x ./build.sh
 ./build.sh
 ```
+
+If you encounter `The contract code couldn't be stored, please check your gas amount.`, just run `./build.sh` again. This error occurs because we can't deploy abstract contracts.

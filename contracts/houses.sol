@@ -18,10 +18,10 @@ contract Houses {
     uint256 houseId = 0;
 
     /** Map of house ids to each corresponding house. */
-    mapping(uint256 => House) public houses;
+    mapping(uint256 => House) private houses;
 
     /** Map of addresses to ids of houses it owns. */
-    mapping(address => uint256[]) public housesOf;
+    mapping(address => uint256[]) private housesOf;
 
     /** Map of a grid's id to houses located in that particular grid. */
     mapping(uint256 => uint256[]) private housesInGrid;
@@ -170,6 +170,7 @@ contract Houses {
         /* Record grid. */
         bool succ;
         uint256 gridId;
+
         (succ, gridId) = updateCoordinates(house.id, latitude, longitude);
         if (!succ) {
             /* This listing failed. Reset houseId. */

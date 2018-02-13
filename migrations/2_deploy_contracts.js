@@ -1,5 +1,6 @@
 var OkeyDokeyGod = artifacts.require("OkeyDokeyGod");
 var OkeyDokey = artifacts.require("OkeyDokey");
+var Token = artifacts.require("OkeyDokeyToken");
 var Houses = artifacts.require("Houses");
 var Devices = artifacts.require("Devices");
 var Reservations = artifacts.require("Reservations");
@@ -13,12 +14,13 @@ var Reviews = artifacts.require("Reviews");
  */
 module.exports = async function(deployer) {
 
-    let OkeyDokeyGodInst, OkeyDokeyInst;
+    let OkeyDokeyGodInst, OkeyDokeyInst, TokenInst;
     let HousesInst, DevicesInst, ReservationsInst, ReviewsInst;
 
     await Promise.all([
         deployer.deploy(OkeyDokeyGod),
         deployer.deploy(OkeyDokey),
+        deployer.deploy(Token, 1000000000, "OkeyDokeyToken", "ODK"),
         deployer.deploy(Devices),
         deployer.deploy(Reservations),
         deployer.deploy(Reviews),
@@ -31,6 +33,7 @@ module.exports = async function(deployer) {
     instances = await Promise.all([
         OkeyDokeyGod.deployed(),
         OkeyDokey.deployed(),
+        Token.deployed(),
         Devices.deployed(),
         Reservations.deployed(),
         Reviews.deployed(),
@@ -42,19 +45,21 @@ module.exports = async function(deployer) {
     // Assign instances.
     OkeyDokeyGodInst = instances[0];
     OkeyDokeyInst = instances[1];
-    DevicesInst = instances[2];
-    ReservationsInst = instances[3];
-    ReviewsInst = instances[4];
-    HousesInst = instances[5];
+    TokenInst = instances[2];
+    DevicesInst = instances[3];
+    ReservationsInst = instances[4];
+    ReviewsInst = instances[5];
+    HousesInst = instances[6];
 
     // Set addresses.
     results = await Promise.all([
         OkeyDokeyGodInst.updateAddress(OkeyDokeyInst.address),
+        OkeyDokeyInst.updateAddress(0, TokenInst.address),
         OkeyDokeyInst.updateAddress(1, HousesInst.address),
         OkeyDokeyInst.updateAddress(2, DevicesInst.address),
         OkeyDokeyInst.updateAddress(3, ReservationsInst.address),
         OkeyDokeyInst.updateAddress(4, ReviewsInst.address),
-        // HousesInst.initializeContracts(OkeyDokeyInst.address)
+        HousesInst.initializeContracts(OkeyDokeyInst.address)
         // DevicesInst.initializeContracts(OkeyDokeyInst.address),
         // ReservationsInst.initializeContracts(OkeyDokeyInst.address),
         // ReviewsInst.initializeContracts(OkeyDokeyInst.address)
@@ -65,20 +70,21 @@ module.exports = async function(deployer) {
 
     // Check initialization.
     const godOkdk = await OkeyDokeyGodInst.getAddress();
-    // const okdkToken = await OkeyDokeyGodInst.getAddress(0);
+    const okdkToken = await OkeyDokeyGodInst.getAddress(0);
     const okdkHouses = await OkeyDokeyInst.getAddress(1);
     const okdkDevices = await OkeyDokeyInst.getAddress(2);
     const okdkReservations = await OkeyDokeyInst.getAddress(3);
     const okdkReviews = await OkeyDokeyInst.getAddress(4);
 
     var godCheck = (godOkdk == OkeyDokeyInst.address);
-    // boolean okeyDokeyCheck1 = (okdkToken == Token.address);
+    var okeyDokeyCheck1 = (okdkToken == Token.address);
     var okeyDokeyCheck2 = (okdkHouses == HousesInst.address);
     var okeyDokeyCheck3 = (okdkDevices == DevicesInst.address);
     var okeyDokeyCheck4 = (okdkReservations == ReservationsInst.address);
     var okeyDokeyCheck5 = (okdkReviews == ReviewsInst.address);
 
     printTestResult(godCheck, 'OkeyDokeyGod', 'OkeyDokey');
+    printTestResult(okeyDokeyCheck1, 'OkeyDokey', 'Token');
     printTestResult(okeyDokeyCheck2, 'OkeyDokey', 'Houses');
     printTestResult(okeyDokeyCheck3, 'OkeyDokey', 'Devices');
     printTestResult(okeyDokeyCheck4, 'OkeyDokey', 'Reservations');

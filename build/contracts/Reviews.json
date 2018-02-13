@@ -3,8 +3,8 @@
   "abi": [],
   "bytecode": "0x60606040523415600e57600080fd5b603580601b6000396000f3006060604052600080fd00a165627a7a723058202965821830f07cb5f1f390b680a979ae2360afc7afe9582f4d2ff998dd0380230029",
   "deployedBytecode": "0x6060604052600080fd00a165627a7a723058202965821830f07cb5f1f390b680a979ae2360afc7afe9582f4d2ff998dd0380230029",
-  "sourceMap": "26:21:6:-;;;;;;;;;;;;;;;;;",
-  "deployedSourceMap": "26:21:6:-;;;;;",
+  "sourceMap": "26:21:7:-;;;;;;;;;;;;;;;;;",
+  "deployedSourceMap": "26:21:7:-;;;;;",
   "source": "pragma solidity ^0.4.19;\n\ncontract Reviews {\n\n}\n",
   "sourcePath": "/home/seongmin/okeydokey/contracts/reviews.sol",
   "ast": {
@@ -12,7 +12,7 @@
       "absolutePath": "/home/seongmin/okeydokey/contracts/reviews.sol",
       "exportedSymbols": {
         "Reviews": [
-          1074
+          1694
         ]
       }
     },
@@ -26,9 +26,9 @@
             ".19"
           ]
         },
-        "id": 1073,
+        "id": 1693,
         "name": "PragmaDirective",
-        "src": "0:24:6"
+        "src": "0:24:7"
       },
       {
         "attributes": {
@@ -42,34 +42,34 @@
           "documentation": null,
           "fullyImplemented": true,
           "linearizedBaseContracts": [
-            1074
+            1694
           ],
           "name": "Reviews",
           "nodes": [
             null
           ],
-          "scope": 1075
+          "scope": 1695
         },
-        "id": 1074,
+        "id": 1694,
         "name": "ContractDefinition",
-        "src": "26:21:6"
+        "src": "26:21:7"
       }
     ],
-    "id": 1075,
+    "id": 1695,
     "name": "SourceUnit",
-    "src": "0:48:6"
+    "src": "0:48:7"
   },
   "compiler": {
     "name": "solc",
     "version": "0.4.19+commit.c4cbbb05.Emscripten.clang"
   },
   "networks": {
-    "1518470309173": {
+    "1518491380953": {
       "events": {},
       "links": {},
-      "address": "0x7eb5dce815ccf5e1fffb82ac71c81f78a6762fba"
+      "address": "0xcd8ff0c35ccb46f48d59a75d998cae85ab71bd87"
     }
   },
   "schemaVersion": "1.0.1",
-  "updatedAt": "2018-02-12T21:18:35.592Z"
+  "updatedAt": "2018-02-13T03:09:47.231Z"
 }

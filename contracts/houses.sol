@@ -167,27 +167,11 @@ contract Houses {
 
         houses[house.id] = house;
 
-<<<<<<< HEAD
-        // /* Add host as administrator. */
-        // bool succ1 = addAdministrator(house.id, msg.sender);
-        // if (!succ1) {
-        //     /* This listing failed. Reset houseId. */
-        //     houseId -= 1;
-        //     return;
-        // }
-
-=======
->>>>>>> 68f5fc38eac4353415a8d9f48a0c791d07ef4d01
         /* Record grid. */
         bool succ;
         uint256 gridId;
-<<<<<<< HEAD
-        (succ2, gridId) = updateCoordinates(house.id, latitude, longitude);
-        if (!succ2) {
-=======
         (succ, gridId) = updateCoordinates(house.id, latitude, longitude);
         if (!succ) {
->>>>>>> 68f5fc38eac4353415a8d9f48a0c791d07ef4d01
             /* This listing failed. Reset houseId. */
             houseId -= 1;
             return;

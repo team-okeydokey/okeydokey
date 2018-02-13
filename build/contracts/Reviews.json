@@ -12,7 +12,7 @@
       "absolutePath": "/home/seongmin/okeydokey/contracts/reviews.sol",
       "exportedSymbols": {
         "Reviews": [
-          1694
+          1669
         ]
       }
     },
@@ -26,7 +26,7 @@
             ".19"
           ]
         },
-        "id": 1693,
+        "id": 1668,
         "name": "PragmaDirective",
         "src": "0:24:7"
       },
@@ -42,20 +42,20 @@
           "documentation": null,
           "fullyImplemented": true,
           "linearizedBaseContracts": [
-            1694
+            1669
           ],
           "name": "Reviews",
           "nodes": [
             null
           ],
-          "scope": 1695
+          "scope": 1670
         },
-        "id": 1694,
+        "id": 1669,
         "name": "ContractDefinition",
         "src": "26:21:7"
       }
     ],
-    "id": 1695,
+    "id": 1670,
     "name": "SourceUnit",
     "src": "0:48:7"
   },
@@ -64,12 +64,12 @@
     "version": "0.4.19+commit.c4cbbb05.Emscripten.clang"
   },
   "networks": {
-    "1518493694018": {
+    "1518499849397": {
       "events": {},
       "links": {},
       "address": "0xcd8ff0c35ccb46f48d59a75d998cae85ab71bd87"
     }
   },
   "schemaVersion": "1.0.1",
-  "updatedAt": "2018-02-13T03:48:23.222Z"
+  "updatedAt": "2018-02-13T05:30:54.844Z"
 }

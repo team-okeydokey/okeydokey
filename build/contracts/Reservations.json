@@ -12,7 +12,7 @@
       "absolutePath": "/home/seongmin/okeydokey/contracts/reservations.sol",
       "exportedSymbols": {
         "Reservations": [
-          1691
+          1666
         ]
       }
     },
@@ -26,7 +26,7 @@
             ".19"
           ]
         },
-        "id": 1690,
+        "id": 1665,
         "name": "PragmaDirective",
         "src": "0:24:6"
       },
@@ -42,20 +42,20 @@
           "documentation": null,
           "fullyImplemented": true,
           "linearizedBaseContracts": [
-            1691
+            1666
           ],
           "name": "Reservations",
           "nodes": [
             null
           ],
-          "scope": 1692
+          "scope": 1667
         },
-        "id": 1691,
+        "id": 1666,
         "name": "ContractDefinition",
         "src": "26:27:6"
       }
     ],
-    "id": 1692,
+    "id": 1667,
     "name": "SourceUnit",
     "src": "0:53:6"
   },
@@ -64,12 +64,12 @@
     "version": "0.4.19+commit.c4cbbb05.Emscripten.clang"
   },
   "networks": {
-    "1518493694018": {
+    "1518499849397": {
       "events": {},
       "links": {},
       "address": "0x7eb5dce815ccf5e1fffb82ac71c81f78a6762fba"
     }
   },
   "schemaVersion": "1.0.1",
-  "updatedAt": "2018-02-13T03:48:23.221Z"
+  "updatedAt": "2018-02-13T05:30:54.843Z"
 }

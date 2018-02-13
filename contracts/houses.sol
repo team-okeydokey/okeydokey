@@ -18,10 +18,10 @@ contract Houses {
     uint256 houseId = 0;
 
     /** Map of house ids to each corresponding house. */
-    mapping(uint256 => House) private houses;
+    mapping(uint256 => House) public houses;
 
     /** Map of addresses to ids of houses it owns. */
-    mapping(address => uint256[]) private housesOf;
+    mapping(address => uint256[]) public housesOf;
 
     /** Map of a grid's id to houses located in that particular grid. */
     mapping(uint256 => uint256[]) private housesInGrid;
@@ -159,8 +159,7 @@ contract Houses {
         /* Smallest houseId is 1 */
         houseId += 1;
 
-        House memory house; 
-
+        House memory house;
         house.id = houseId;
         house.host = msg.sender;
 
@@ -168,11 +167,27 @@ contract Houses {
 
         houses[house.id] = house;
 
+<<<<<<< HEAD
+        // /* Add host as administrator. */
+        // bool succ1 = addAdministrator(house.id, msg.sender);
+        // if (!succ1) {
+        //     /* This listing failed. Reset houseId. */
+        //     houseId -= 1;
+        //     return;
+        // }
+
+=======
+>>>>>>> 68f5fc38eac4353415a8d9f48a0c791d07ef4d01
         /* Record grid. */
         bool succ;
         uint256 gridId;
+<<<<<<< HEAD
+        (succ2, gridId) = updateCoordinates(house.id, latitude, longitude);
+        if (!succ2) {
+=======
         (succ, gridId) = updateCoordinates(house.id, latitude, longitude);
         if (!succ) {
+>>>>>>> 68f5fc38eac4353415a8d9f48a0c791d07ef4d01
             /* This listing failed. Reset houseId. */
             houseId -= 1;
             return;

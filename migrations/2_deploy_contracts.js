@@ -63,8 +63,6 @@ module.exports = async function(deployer) {
         // DevicesInst.initializeContracts(OkeyDokeyInst.address),
         // ReservationsInst.initializeContracts(OkeyDokeyInst.address),
         // ReviewsInst.initializeContracts(OkeyDokeyInst.address)
-
-        HousesInst.registerHouse("hello", 100, 100)
     ]).catch(function(error) {
         console.log(error);
     });

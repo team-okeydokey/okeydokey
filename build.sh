@@ -24,7 +24,7 @@ fi
 sleep 1
 
 # Delete build folder.
-rm -r build/
+rm -r ./build/
 
 # Build and deploy to vm.
 truffle migrate

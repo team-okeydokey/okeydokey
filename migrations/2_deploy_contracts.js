@@ -59,10 +59,12 @@ module.exports = async function(deployer) {
         OkeyDokeyInst.updateAddress(2, DevicesInst.address),
         OkeyDokeyInst.updateAddress(3, ReservationsInst.address),
         OkeyDokeyInst.updateAddress(4, ReviewsInst.address),
-        HousesInst.initializeContracts(OkeyDokeyInst.address)
+        HousesInst.initializeContracts(OkeyDokeyInst.address),
         // DevicesInst.initializeContracts(OkeyDokeyInst.address),
         // ReservationsInst.initializeContracts(OkeyDokeyInst.address),
         // ReviewsInst.initializeContracts(OkeyDokeyInst.address)
+
+        HousesInst.registerHouse("hello", 100, 100)
     ]).catch(function(error) {
         console.log(error);
     });

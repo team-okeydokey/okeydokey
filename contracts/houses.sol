@@ -167,6 +167,7 @@ contract Houses {
 
         houses[house.id] = house;
 
+<<<<<<< HEAD
         // /* Add host as administrator. */
         // bool succ1 = addAdministrator(house.id, msg.sender);
         // if (!succ1) {
@@ -175,11 +176,18 @@ contract Houses {
         //     return;
         // }
 
+=======
+>>>>>>> 68f5fc38eac4353415a8d9f48a0c791d07ef4d01
         /* Record grid. */
-        bool succ2;
+        bool succ;
         uint256 gridId;
+<<<<<<< HEAD
         (succ2, gridId) = updateCoordinates(house.id, latitude, longitude);
         if (!succ2) {
+=======
+        (succ, gridId) = updateCoordinates(house.id, latitude, longitude);
+        if (!succ) {
+>>>>>>> 68f5fc38eac4353415a8d9f48a0c791d07ef4d01
             /* This listing failed. Reset houseId. */
             houseId -= 1;
             return;
@@ -191,7 +199,6 @@ contract Houses {
 
         /* Add newly created house to storage. */
         housesOf[msg.sender].push(house.id);
-        housesInGrid[gridId].push(house.id);
 
         success = true;
         newId = house.id;
@@ -248,7 +255,7 @@ contract Houses {
         }
 
         /* Fetch previous coordinates. */
-        House memory house = houses[id];  
+        House storage house = houses[id];  
 
         if (house.valid) { /* This is not a new entry. */
 

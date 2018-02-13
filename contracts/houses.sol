@@ -240,7 +240,7 @@ contract Houses {
         }
 
         /* Fetch previous coordinates. */
-        House storage house = houses[id];  
+        House memory house = houses[id];  
 
         if (house.valid) { /* This is not a new entry. */
 

@@ -211,6 +211,32 @@ contract Houses {
     } 
 
     /**
+     * Fetch house information.
+     *
+     * @param _id The id of the house to query.
+     * @return success Whether the query was successful.
+     * @return id Id of the house.
+     * @return bzzHash Swarm identifier of JSON file containing house info.
+     * @return host Address of the host.
+     * @return active Whether the listing is active.
+     */
+    function getHouseInfo(uint256 _id) public view
+        returns (bool success, uint256 id, bytes bzzHash, 
+                 address host, bool active) {
+
+        success = false;
+
+        House memory house = houses[_id]; 
+
+        id = house.id;
+        bzzHash = house.bzzHash;
+        host = house.host;
+        active = house.active;
+        
+        success = true;
+    } 
+
+    /**
      * Update coordinates for a house listing. 
      *
      * @param id The id of the house to edit.

@@ -74,12 +74,11 @@ contract Houses {
     /**
      * Modifier for functions only house host(owner) can run.
      *
-     * MUST INCLUDE validHouse modifier BEFORE INCLUDING THIS.
-     * ex) function addAdministrator validHouse(id) onlyHost(id) public
-     *
      * @param id The id of house being manipulated.
      */
     modifier onlyHost(uint256 id) {
+
+        require(houses[id].valid);
 
         /* Verify owner. */
         require(houses[id].host == msg.sender);
@@ -90,12 +89,11 @@ contract Houses {
     /**
      * Modifier for functions only house admins can run.
      * 
-     * MUST INCLUDE validHouse modifier BEFORE INCLUDING THIS.
-     * ex) function editHouse validHouse(id) onlyAdmins(id) public
-     * 
      * @param id The id of house being manipulated.
      */
     modifier onlyAdmins(uint256 id) {
+
+        require(houses[id].valid);
         
         /* Search for admin address. */
         bool found = false;
@@ -201,9 +199,12 @@ contract Houses {
      * @param id The id of the house to edit.
      * @param bzzHash Swarm identifier of JSON file containing house info.
      * @param gridId Id within the Earth's grid.
+     * @return success Whether the edit was successful.
      */
     function editHouse(uint256 id, bytes bzzHash, uint256 gridId) 
-        validHouse(id) onlyAdmins(id) public {
+        onlyAdmins(id) public returns (bool success) {
+
+        success = false;
 
         House storage house = houses[id]; 
 
@@ -222,20 +223,27 @@ contract Houses {
             /* Update location. */
             house.gridId = gridId;
         }
+
+        success = true;
+
+        return success;
     } 
 
     /**
      * Fetch house information.
      *
      * @param _id The id of the house to query.
+     * @return success Whether the query was successful.
      * @return id Id of the house.
      * @return bzzHash Swarm identifier of JSON file containing house info.
      * @return host Address of the host.
      * @return active Whether the listing is active.
      */
-    function getHouseInfo(uint256 _id) validHouse(id) public view
-        returns (uint256 id, bytes bzzHash, 
+    function getHouseInfo(uint256 _id) validHouse(_id) public view
+        returns (bool success, uint256 id, bytes bzzHash, 
                  address host, bool active) {
+
+        success = false;
 
         House storage house = houses[_id]; 
 
@@ -243,6 +251,7 @@ contract Houses {
         bzzHash = house.bzzHash;
         host = house.host;
         active = house.active;
+        success = true;
     } 
 
      /**
@@ -277,7 +286,7 @@ contract Houses {
      * @return success Whether adding was successful.
      */
     function addAdministrator(uint256 id, address newAdmin) 
-        validHouse(id) onlyHost(id) public returns (bool success) {
+        onlyHost(id) public returns (bool success) {
 
         House storage house = houses[id];
 
@@ -310,7 +319,7 @@ contract Houses {
      * @return success Whether the operation was successful.
      */
     function removeAdministrator(uint256 id, address toDelete) 
-        validHouse(id) onlyHost(id) public returns (bool success) {
+        onlyHost(id) public returns (bool success) {
 
         House storage house = houses[id];
 

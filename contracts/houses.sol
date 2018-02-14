@@ -268,8 +268,6 @@ contract Houses {
     function addAdministrator(uint256 id, address newAdmin) 
         onlyHost(id) public returns (bool success) {
 
-        success = false;
-
         House storage house = houses[id];
 
         if (house.valid) {
@@ -287,13 +285,12 @@ contract Houses {
 
             if (!found) {
                 house.administrators.push(newAdmin);
-                success = true;
-                return;
+                return true;
             }
         }
-
+        return false; 
     }
-
+    
     /**
      * Remove administrator from house.
      *
@@ -303,8 +300,6 @@ contract Houses {
      */
     function removeAdministrator(uint256 id, address toDelete) 
         onlyHost(id) public returns (bool success) {
-
-        success = false;
 
         House storage house = houses[id];
 
@@ -323,11 +318,12 @@ contract Houses {
             }
 
             if (found) {
+                // TODO: currently, this leaves a gap (deleting simply makes element 0)
                 delete admins[index];
-                success = true;
-                return;
+                return true;
             }
         }
+        return false; 
     }
 
     /**

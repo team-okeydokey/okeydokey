@@ -362,51 +362,6 @@ contract Houses {
     } 
 
     /**
-     * Getter for host address of house.
-     *
-     * @param id Id of house to query.
-     * @return host Host address of the house.
-     */
-    function getHost(uint256 id) validHouse(id) public view 
-        returns (bool success, address host) {
-
-        success = false;
-
-        host = houses[id].host;
-        success = true;
-    }
-
-    /**
-     * Getter for active flag of house.
-     *
-     * @param id Id of house to query.
-     * @return active Active flag of the house.
-     */
-    function getActive(uint256 id) validHouse(id) public view 
-        returns (bool success, bool active) {
-
-        success = false;
-
-        active = houses[id].active;
-        success = true;
-    }
-
-    /**
-     * Getter for Swarm hash of house.
-     *
-     * @param id Id of house to query.
-     * @return bzzHash Swarm identifier of JSON file containing house info.
-     */
-    function getBzzHash(uint256 id) validHouse(id) public view 
-        returns (bool success, bytes bzzHash) {
-
-        success = false;
-
-        bzzHash = houses[id].bzzHash;
-        success = true;
-    }
-
-    /**
      * Self destruct.
      */
     function kill() system public { 

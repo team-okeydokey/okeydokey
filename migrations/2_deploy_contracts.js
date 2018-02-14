@@ -21,10 +21,10 @@ module.exports = async function(deployer) {
         deployer.deploy(OkeyDokeyGod),
         deployer.deploy(OkeyDokey),
         deployer.deploy(Token, 1000000000, "OkeyDokeyToken", "ODK"),
+        deployer.deploy(Houses),
         deployer.deploy(Devices),
         deployer.deploy(Reservations),
-        deployer.deploy(Reviews),
-        deployer.deploy(Houses)
+        deployer.deploy(Reviews)
     ]).catch(function(error) {
         console.log(error);
     });
@@ -34,10 +34,10 @@ module.exports = async function(deployer) {
         OkeyDokeyGod.deployed(),
         OkeyDokey.deployed(),
         Token.deployed(),
+        Houses.deployed(),
         Devices.deployed(),
         Reservations.deployed(),
-        Reviews.deployed(),
-        Houses.deployed()
+        Reviews.deployed()
     ]).catch(function(error) {
         console.log(error);
     });
@@ -46,10 +46,10 @@ module.exports = async function(deployer) {
     OkeyDokeyGodInst = instances[0];
     OkeyDokeyInst = instances[1];
     TokenInst = instances[2];
-    DevicesInst = instances[3];
-    ReservationsInst = instances[4];
-    ReviewsInst = instances[5];
-    HousesInst = instances[6];
+    HousesInst = instances[3];
+    DevicesInst = instances[4];
+    ReservationsInst = instances[5];
+    ReviewsInst = instances[6];
 
     // Set addresses.
     results = await Promise.all([

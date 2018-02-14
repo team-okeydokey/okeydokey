@@ -7,8 +7,7 @@ contract OkeyDokey {
 
 contract Houses {
 	/* Get house info. */
-    function getHouseInfo(uint256) public view 
-    	returns (bool success, uint256 id, bytes bzzHash, address host, bool active);
+    function getHouseInfo(uint256) public view returns (bool, uint256, bytes, address, bool);
 }
 
 contract Reservations {
@@ -186,7 +185,7 @@ contract Reservations {
      * @return success Whether the reservation was successful.
      * @return reservationCode Generated random reservation code.
      */
-	function generateReservationCode(address seed) internal 
+	function generateReservationCode(address seed) internal pure
 		returns (bool success, uint256 reservationCode) {
 
 		success = false;

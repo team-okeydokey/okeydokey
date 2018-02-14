@@ -174,6 +174,9 @@ contract Houses {
         housesOf[msg.sender].push(house.id);
         housesInGrid[gridId].push(house.id);
 
+        /* add host as administrator as well */
+        houses[house.id].administrators.push(msg.sender);
+
         newId = house.id;
     } 
 

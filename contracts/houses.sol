@@ -88,7 +88,7 @@ contract Houses {
     }
 
     /**
-     * Modifier for functions only designated admins can run.
+     * Modifier for functions only house admins can run.
      *
      * @param id The id of house being manipulated.
      */
@@ -122,7 +122,7 @@ contract Houses {
     }
 
     /**
-     * Reinitialize values dependant on other functions.
+     * Reinitialize values dependent on other functions.
      *
      * @param _okeyDokeyAddress The address of main application contract.
      * @return success Whether the reinitialization was successful.

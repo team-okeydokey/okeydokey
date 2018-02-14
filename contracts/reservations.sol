@@ -125,7 +125,7 @@ contract Reservations {
      *
      * @param houseId The id of house to reserve.
      * @param checkIn Time of checkin, in milliseconds from UNIX epoch.
-     * @param checkOut Time of checkin, in milliseconds from UNIX epoch.
+     * @param checkOut Time of checkOut, in milliseconds from UNIX epoch.
      * @return success Whether the reservation was successful.
      * @return newId Id of the created reservation.
      */
@@ -140,8 +140,12 @@ contract Reservations {
 
         Reservation memory reservation;
 
+        /* Store reservation information. */
         reservation.id = reservationId;
         reservation.houseId = houseId;
+        reservation.reserver = msg.sender;
+        reservation.checkIn = checkIn;
+        reservation.checkOut = checkOut;
 
         /* Fetch house information. */
         var (succ1, fetchedId, , host, active) = houses.getHouseInfo(houseId);
@@ -161,10 +165,6 @@ contract Reservations {
         	return;
         }
         reservation.reservationCode = reservationCode;
-
-        reservation.reserver = msg.sender;
-        reservation.checkIn = checkIn;
-        reservation.checkOut = checkOut;
 
         /* Add host as guest as well */
         reservations[reservation.id].guests.push(msg.sender);

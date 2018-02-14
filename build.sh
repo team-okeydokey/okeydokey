@@ -31,4 +31,4 @@ truffle migrate
 
 # Copy json abi files to okdkjs.
 # find ./build/contracts/ ! -name Migrations.json -exec cp -t ../okdkjs/lib/contracts/ {} +
-rsync -r --exclude='Migrations.json' ./build/contracts/ ../okdkjs/lib/contracts/
+rsync -r --exclude='Migrations.json' --exclude='Test.json' ./build/contracts/ ../okdkjs/lib/contracts/

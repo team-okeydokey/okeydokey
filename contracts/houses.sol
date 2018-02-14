@@ -147,38 +147,33 @@ contract Houses {
      * @return newId Id of the new house. Must be greater than 0 to be considered valid.
      */
     function registerHouse(bytes bzzHash, uint256 gridId) 
-        public returns (bool success, uint256 newId) {
+        public returns (uint256 newId) {
 
-        success = false;
+        // TODO: more contraints
+        // ex: require(bzzHash.length != 0);
+        
         newId = 0;
 
         /* Smallest houseId is 1 */
         houseId += 1;
 
         House memory house;
-        house.id = houseId;
-        house.host = msg.sender;
 
+        house.id = houseId;
         house.bzzHash = bzzHash;
 
-        houses[house.id] = house;
-
-        /* Record grid. */
-        bool succ = updateGridId(house.id, gridId);
-        if (!succ) {
-            /* This listing failed. Reset houseId. */
-            houseId -= 1;
-            return;
-        }
+        house.host = msg.sender;
+        house.gridId = gridId;
 
         /* Logistics */
         house.active = true;
         house.valid = true;
 
-        /* Add newly created house to storage. */
+        /* save newly created house to storage. */
+        houses[house.id] = house;
         housesOf[msg.sender].push(house.id);
+        housesInGrid[gridId].push(house.id);
 
-        success = true;
         newId = house.id;
     } 
 

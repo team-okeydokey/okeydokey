@@ -24,7 +24,15 @@ fi
 sleep 1
 
 # Delete build folder.
-rm -r ./build/
+if [ -d "./build/" ]; then
+   rm -r ./build/
+fi
+
+if [ -d "../okdkjs/lib/contracts/" ]; then
+   rm -r ../okdkjs/lib/contracts/
+fi
+mkdir ../okdkjs/lib/contracts/
+
 
 # Build and deploy to vm.
 truffle migrate

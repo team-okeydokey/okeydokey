@@ -1,14 +1,7 @@
 pragma solidity ^0.4.19;
 
-contract OkeyDokey {
-    /** Get addresses of other contracts. */
-    function getAddress(uint16) public view returns (address);
-}
-
-contract Houses {
-	/* Get house info. */
-    function getHouseInfo(uint256) public view returns (bool, uint256, bytes, address, bool);
-}
+import "./okeydokey.sol";
+import "./houses.sol";
 
 contract Reservations {
 

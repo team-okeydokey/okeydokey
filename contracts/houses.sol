@@ -1,13 +1,7 @@
 pragma solidity ^0.4.19;
 
-contract OkeyDokey {
-    /** Get addresses of other contracts. */
-    function getAddress(uint16) public view returns (address);
-}
-
-contract Devices {
-    // function getAddress(uint16) public view returns (address);
-}
+import "./okeydokey.sol";
+import "./devices.sol";
 
 contract Houses {
 

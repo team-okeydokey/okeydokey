@@ -121,13 +121,12 @@ contract Houses {
     }
 
     /**
-     * Reinitialize values dependent on other functions.
+     * Initialize other OKDK contracts this contract depends on.
      *
      * @param _okeyDokeyAddress The address of main application contract.
-     * @return success Whether the reinitialization was successful.
+     * @return success Whether the initialization was successful.
      */
-    function initializeContracts(address _okeyDokeyAddress) public returns (bool success) {
-        require(msg.sender == admin);
+    function initializeContracts(address _okeyDokeyAddress) system public returns (bool success) {
         require(_okeyDokeyAddress != 0);
         require(_okeyDokeyAddress != address(this));
 
@@ -135,7 +134,7 @@ contract Houses {
         okeyDokey = OkeyDokey(okeyDokeyAddress);
 
         devicesAddress = okeyDokey.getAddress(2);
-        devices = Devices(devicesAddress);
+        devices = Devices(okeyDokeyAddress);
 
         return true;
     }

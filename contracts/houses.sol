@@ -77,7 +77,7 @@ contract Houses {
      * @param id The id of house being manipulated.
      */
     modifier onlyHost(uint256 id) {
-        House memory house = houses[id]; 
+        House storage house = houses[id]; 
 
         require(house.valid);  
 
@@ -93,13 +93,13 @@ contract Houses {
      * @param id The id of house being manipulated.
      */
     modifier onlyAdmins(uint256 id) {
-        House memory house = houses[id]; 
+        House storage house = houses[id]; 
 
         require(house.valid);  
 
         /* Search for admin address. */
         bool found = false;
-        address[] memory admins = house.administrators;
+        address[] storage admins = house.administrators;
         for (uint256 i=0; i < admins.length; i++) {
             if (admins[i] == msg.sender) {
                 found = true;
@@ -240,7 +240,7 @@ contract Houses {
         }
 
         /* Fetch previous coordinates. */
-        House memory house = houses[id];  
+        House storage house = houses[id];  
 
         if (house.valid) { /* This is not a new entry. */
 
@@ -308,7 +308,7 @@ contract Houses {
         if (house.valid) {
             bool found = false;
             uint256 index = 0;
-            address[] memory admins = house.administrators;
+            address[] storage admins = house.administrators;
 
             /* Search for previous entry */
             for (uint256 i=0; i < admins.length; i++) {
@@ -345,7 +345,7 @@ contract Houses {
 
             bool found = false;
             uint256 index = 0;
-            address[] memory admins = house.administrators;
+            address[] storage admins = house.administrators;
 
             /* Search for previous entry */
             for (uint256 i=0; i < admins.length; i++) {
@@ -373,7 +373,7 @@ contract Houses {
     function getIpfsHash(uint256 id) public view returns (bool success, bytes ipfsHash) {
         success = false;
 
-        House memory house = houses[id];
+        House storage house = houses[id];
         if (house.valid) {
             success = true;
             ipfsHash = house.ipfsHash;

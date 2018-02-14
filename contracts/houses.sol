@@ -43,7 +43,7 @@ contract Houses {
 
         /* House info */
         uint256 id;
-        bytes ipfsHash;
+        bytes bzzHash;
 
         /* Owner info */
         address host;
@@ -53,8 +53,7 @@ contract Houses {
         address[] devices;
 
         /* Location */
-        uint256 latitude;
-        uint256 longitude;
+        uint256 gridId;
 
         /* Logistics */
         bool active;
@@ -136,7 +135,7 @@ contract Houses {
         okeyDokey = OkeyDokey(okeyDokeyAddress);
 
         devicesAddress = okeyDokey.getAddress(2);
-        devices = Devices(okeyDokeyAddress);
+        devices = Devices(devicesAddress);
 
         return true;
     }
@@ -144,13 +143,12 @@ contract Houses {
     /**
      * Register and list a new house.
      *
-     * @param ipfsHash Ipfs identifier of JSON file containing house info.
-     * @param latitude The lattitude of the house, multiplied by 1 million.
-     * @param longitude The longitude of the house, multiplied by 1 million.
+     * @param bzzHash Swarm identifier of JSON file containing house info.
+     * @param gridId Id within the Earth's grid.
      * @return success Whether the registration was successful.
      * @return newId Id of the new house. Must be greater than 0 to be considered valid.
      */
-    function registerHouse(bytes ipfsHash, uint256 latitude, uint256 longitude) 
+    function registerHouse(bytes bzzHash, uint256 gridId) 
         public returns (bool success, uint256 newId) {
 
         success = false;
@@ -163,15 +161,12 @@ contract Houses {
         house.id = houseId;
         house.host = msg.sender;
 
-        house.ipfsHash = ipfsHash;
+        house.bzzHash = bzzHash;
 
         houses[house.id] = house;
 
         /* Record grid. */
-        bool succ;
-        uint256 gridId;
-
-        (succ, gridId) = updateCoordinates(house.id, latitude, longitude);
+        bool succ = updateGridId(house.id, gridId);
         if (!succ) {
             /* This listing failed. Reset houseId. */
             houseId -= 1;
@@ -193,24 +188,21 @@ contract Houses {
      * Edit a listed house.
      *
      * @param id The id of the house to edit.
-     * @param ipfsHash Ipfs identifier of JSON file containing house info.
-     * @param latitude The lattitude of the house, multiplied by 1 million.
-     * @param longitude The longitude of the house, multiplied by 1 million.
+     * @param bzzHash Swarm identifier of JSON file containing house info.
+     * @param gridId Id within the Earth's grid.
      * @return success Whether the edit was successful.
      */
-    function editHouse(uint256 id, bytes ipfsHash, 
-        uint256 latitude, uint256 longitude) onlyAdmins(id) public returns (bool success) {
+    function editHouse(uint256 id, bytes bzzHash, uint256 gridId) 
+        onlyAdmins(id) public returns (bool success) {
 
         success = false;
 
         House storage house = houses[id]; 
 
-        house.ipfsHash = ipfsHash;
+        house.bzzHash = bzzHash;
 
         /* Coordinates */
-        bool succ;
-        uint256 gridId;
-        (succ, gridId) = updateCoordinates(id, latitude, longitude);
+        bool succ = updateGridId(id, gridId);
         if (!succ) {
             return;
         }
@@ -222,40 +214,25 @@ contract Houses {
      * Update coordinates for a house listing. 
      *
      * @param id The id of the house to edit.
-     * @param latitude The lattitude of the house, multiplied by 1 million.
-     * @param longitude The longitude of the house, multiplied by 1 million.
+     * @param gridId Id within the Earth's grid.
      * @return success Whether the update was successful.
-     * @return gridId Id within the Earth's grid.
      */
-    function updateCoordinates(uint256 id, uint256 latitude, uint256 longitude) 
-        internal returns (bool success, uint256 gridId) {
+    function updateGridId(uint256 id, uint256 gridId) 
+        internal returns (bool success) {
 
         success = false;
 
-        /* Check new coordinates. */
-        bool succ;
-        (succ, gridId) = getGridId(latitude, longitude);
-        if (!succ) {
-            return;
-        }
-
         /* Fetch previous coordinates. */
-        House memory house = houses[id];  
+        House storage house = houses[id];  
 
         if (house.valid) { /* This is not a new entry. */
 
-            bool prevSucc;
-            uint256 prevGridId;
-            (prevSucc, prevGridId) = getGridId(house.latitude, house.longitude);
-
-            /* This there was a previous entry. */
-            if (prevSucc) {
-                if (prevGridId == gridId) {
-                    return;
-                } else {
-                    /* Erase from previous grid group */
-                    removeFromGrid(prevGridId, house.id);
-                }
+            /* Same as previous entry. */
+            if (house.gridId == gridId) {
+                return;
+            } else {
+                /* Erase from previous grid group */
+                removeFromGrid(house.gridId, house.id);
             }
         }
 
@@ -263,8 +240,7 @@ contract Houses {
         housesInGrid[gridId].push(house.id);
 
         /* Update location. */
-        house.latitude = latitude;
-        house.longitude = longitude;
+        house.gridId = gridId;
 
         success = true;
      }
@@ -364,36 +340,21 @@ contract Houses {
     }
 
     /**
-     * Getter for ipfs hash of house.
+     * Getter for Swarm hash of house.
      *
      * @param id Id of house to query.
      * @return success Whether the query was successful.
-     * @return ipfsHash Ipfs identifier of JSON file containing house info.
+     * @return bzzHash Swarm identifier of JSON file containing house info.
      */
-    function getIpfsHash(uint256 id) public view returns (bool success, bytes ipfsHash) {
+    function getBzzHash(uint256 id) public view returns (bool success, bytes bzzHash) {
         success = false;
 
         House memory house = houses[id];
         if (house.valid) {
             success = true;
-            ipfsHash = house.ipfsHash;
+            bzzHash = house.bzzHash;
             return;
         }
-    }
-
-    /**
-     * Calculate grid id from coordinates.
-     *
-     * @param latitude The lattitude of the house, multiplied by 1 million.
-     * @param longitude The longitude of the house, multiplied by 1 million.
-     * @return success Whether the coordinates were valid.
-     * @return gridId Id within the Earth's grid.
-     */
-    function getGridId(uint256 latitude, uint256 longitude) public pure returns (bool success, uint256 gridId) {
-        success = false;
-
-        success = true;
-        gridId = 0;
     }
 
     /**

@@ -61,7 +61,7 @@ contract Houses {
     }
 
     /**
-     * Modifier for functions only smart contract owner can run.
+     * Modifier for functions only smart contract owner(admin) can run.
      */
     modifier system() {
         /* Verify admin. */
@@ -113,8 +113,7 @@ contract Houses {
     /**
      * Constrctor function.
      *
-     * Assign owner.
-     *
+     * Assign contract owner (admin).
      */
     function Houses() public {
         admin = msg.sender;

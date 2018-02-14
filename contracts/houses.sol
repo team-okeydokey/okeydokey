@@ -186,24 +186,29 @@ contract Houses {
      * @param id The id of the house to edit.
      * @param bzzHash Swarm identifier of JSON file containing house info.
      * @param gridId Id within the Earth's grid.
-     * @return success Whether the edit was successful.
      */
     function editHouse(uint256 id, bytes bzzHash, uint256 gridId) 
-        onlyAdmins(id) public returns (bool success) {
+        onlyAdmins(id) public {
 
-        success = false;
+        require(0 < id && id <= houseId);
 
         House storage house = houses[id]; 
 
+        // TODO: if we can use bytes32, we can check if bzzHash has changed
+        // ex) if(house.bzzHash != bzzHash) ... 
         house.bzzHash = bzzHash;
 
-        /* Coordinates */
-        bool succ = updateGridId(id, gridId);
-        if (!succ) {
-            return;
+        /* iif gridId is different from previous one, update gridId */
+        if(house.gridId != gridId) {
+            /* remove house from previous grid group */
+            removeFromGrid(house.gridId, house.id);
+    
+            /* Add house to new grid group. */
+            housesInGrid[gridId].push(house.id);
+    
+            /* Update location. */
+            house.gridId = gridId;
         }
-        
-        success = true;
     } 
 
     /**
@@ -229,61 +234,28 @@ contract Houses {
         active = house.active;
     } 
 
-    /**
-     * Update coordinates for a house listing. 
-     *
-     * @param id The id of the house to edit.
-     * @param gridId Id within the Earth's grid.
-     * @return success Whether the update was successful.
-     */
-    function updateGridId(uint256 id, uint256 gridId) 
-        internal returns (bool success) {
-
-        success = false;
-
-        /* Fetch previous coordinates. */
-        House storage house = houses[id];  
-
-        if (house.valid) { /* This is not a new entry. */
-
-            /* Same as previous entry. */
-            if (house.gridId == gridId) {
-                return;
-            } else {
-                /* Erase from previous grid group */
-                removeFromGrid(house.gridId, house.id);
-            }
-        }
-
-        /* Add house to new grid group. */
-        housesInGrid[gridId].push(house.id);
-
-        /* Update location. */
-        house.gridId = gridId;
-
-        success = true;
-     }
-
      /**
      * Remove houseId from grid.
      *
      * Helper function for editHouse3. 
      *
-     * @param prevGridId The id of the grid to erase from.
+     * @param prevGridId The id of the grid to erase house from.
      * @param id The id of the house to erase.
-     * @return success Whether the deletion was successful.
      */
-    function removeFromGrid(uint256 prevGridId, uint256 id) internal returns (bool success) {
-        success = false;
-        uint256[] storage ids = housesInGrid[prevGridId];
+    function removeFromGrid(uint256 prevGridId, uint256 id) internal {
+        uint256[] storage houseIds = housesInGrid[prevGridId];
         uint256 toErase;
-        for (uint256 i=0; i < ids.length; i++) {
-            if (ids[i] == id) {
+        for (uint256 i=0; i < houseIds.length; i++) {
+            if (houseIds[i] == id) {
                 toErase = i;
             }
-        } 
-        delete ids[toErase];
-        success = true;
+        }
+
+        /* double check if there exists house id in grid group */        
+        require(toErase != houseIds.length);
+
+        // TODO: currently, this leaves a gap (deleting simply makes element 0)
+        delete houseIds[toErase];
     }
 
     /**

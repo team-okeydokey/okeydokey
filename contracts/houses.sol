@@ -330,18 +330,11 @@ contract Houses {
      * Getter for Swarm hash of house.
      *
      * @param id Id of house to query.
-     * @return success Whether the query was successful.
      * @return bzzHash Swarm identifier of JSON file containing house info.
      */
-    function getBzzHash(uint256 id) public view returns (bool success, bytes bzzHash) {
-        success = false;
+    function getBzzHash(uint256 id) public view returns (bytes bzzHash) {
 
-        House storage house = houses[id];
-        if (house.valid) {
-            success = true;
-            bzzHash = house.bzzHash;
-            return;
-        }
+        return houses[id].bzzHash;
     }
 
     /**

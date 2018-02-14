@@ -61,7 +61,7 @@ module.exports = async function(deployer) {
         OkeyDokeyInst.updateAddress(4, ReviewsInst.address),
         HousesInst.initializeContracts(OkeyDokeyInst.address),
         // DevicesInst.initializeContracts(OkeyDokeyInst.address),
-        // ReservationsInst.initializeContracts(OkeyDokeyInst.address),
+        ReservationsInst.initializeContracts(OkeyDokeyInst.address),
         // ReviewsInst.initializeContracts(OkeyDokeyInst.address)
     ]).catch(function(error) {
         console.log(error);

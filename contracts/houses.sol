@@ -78,6 +78,7 @@ contract Houses {
      */
     modifier onlyHost(uint256 id) {
 
+        require(0 < id && id <= houseId);
         require(houses[id].valid);
 
         /* Verify owner. */
@@ -93,6 +94,7 @@ contract Houses {
      */
     modifier onlyAdmins(uint256 id) {
 
+        require(0 < id && id <= houseId);
         require(houses[id].valid);
         
         /* Search for admin address. */
@@ -158,14 +160,16 @@ contract Houses {
      *
      * @param bzzHash Swarm identifier of JSON file containing house info.
      * @param gridId Id within the Earth's grid.
+     * @return success Id Whether the registration was successful.
      * @return newId Id of the new house. Must be greater than 0 to be considered valid.
      */
     function registerHouse(bytes bzzHash, uint256 gridId) 
-        public returns (uint256 newId) {
+        public returns (bool success, uint256 newId) {
 
         // TODO: more contraints
         // ex: require(bzzHash.length != 0);
         
+        success = false;
         newId = 0;
 
         /* Smallest houseId is 1 */
@@ -179,18 +183,19 @@ contract Houses {
         house.host = msg.sender;
         house.gridId = gridId;
 
-        /* Logistics */
-        house.active = true;
-        house.valid = true;
-
-        /* save newly created house to storage. */
+        /* Save newly created house to storage. */
         houses[house.id] = house;
         housesOf[msg.sender].push(house.id);
         housesInGrid[gridId].push(house.id);
 
-        /* add host as administrator as well */
+        /* Add host as administrator as well */
         houses[house.id].administrators.push(msg.sender);
 
+        /* Logistics */
+        house.active = true;
+        house.valid = true;
+
+        success = true;
         newId = house.id;
     } 
     /**
@@ -208,61 +213,40 @@ contract Houses {
 
         House storage house = houses[id]; 
 
-        // TODO: if we can use bytes32, we can check if bzzHash has changed
-        // ex) if(house.bzzHash != bzzHash) ... 
         house.bzzHash = bzzHash;
 
         /* If gridId is different from the previous one, update gridId */
         if(house.gridId != gridId) {
-            /* remove house from previous grid group */
-            removeFromGrid(house.gridId, house.id);
+            /* Remove house from previous grid group */
+            bool succ = removeFromGrid(house.gridId, house.id);
+
+            if (succ) {
+
+                /* Add house to new grid group. */
+                housesInGrid[gridId].push(house.id);
     
-            /* Add house to new grid group. */
-            housesInGrid[gridId].push(house.id);
-    
-            /* Update location. */
-            house.gridId = gridId;
+                /* Update location. */
+                house.gridId = gridId;
+
+                success = true;
+            }
         }
-
-        success = true;
-
-        return success;
-    } 
+    }
 
     /**
-     * Fetch house information.
-     *
-     * @param _id The id of the house to query.
-     * @return success Whether the query was successful.
-     * @return id Id of the house.
-     * @return bzzHash Swarm identifier of JSON file containing house info.
-     * @return host Address of the host.
-     * @return active Whether the listing is active.
-     */
-    function getHouseInfo(uint256 _id) validHouse(_id) public view
-        returns (bool success, uint256 id, bytes bzzHash, 
-                 address host, bool active) {
-
-        success = false;
-
-        House storage house = houses[_id]; 
-
-        id = house.id;
-        bzzHash = house.bzzHash;
-        host = house.host;
-        active = house.active;
-        success = true;
-    } 
-
-     /**
      * Remove houseId from grid.
      *
      * Helper function for editHouse3. 
      *
      * @param prevGridId The id of the grid to erase house from.
      * @param id The id of the house to erase.
+     * @return success Whether the operation was successful.
      */
-    function removeFromGrid(uint256 prevGridId, uint256 id) internal {
+    function removeFromGrid(uint256 prevGridId, uint256 id) 
+        internal returns (bool success) {
+
+        success = false;
+
         uint256[] storage houseIds = housesInGrid[prevGridId];
         uint256 toErase;
         for (uint256 i=0; i < houseIds.length; i++) {
@@ -276,6 +260,8 @@ contract Houses {
 
         // TODO: currently, this leaves a gap (deleting simply makes element 0)
         delete houseIds[toErase];
+
+        success = true;
     }
 
     /**
@@ -287,6 +273,8 @@ contract Houses {
      */
     function addAdministrator(uint256 id, address newAdmin) 
         onlyHost(id) public returns (bool success) {
+
+        success = false;
 
         House storage house = houses[id];
 
@@ -305,10 +293,10 @@ contract Houses {
 
             if (!found) {
                 house.administrators.push(newAdmin);
-                return true;
+                success = true;
+                return;
             }
         }
-        return false; 
     }
 
     /**
@@ -320,6 +308,8 @@ contract Houses {
      */
     function removeAdministrator(uint256 id, address toDelete) 
         onlyHost(id) public returns (bool success) {
+
+        success = false;
 
         House storage house = houses[id];
 
@@ -340,10 +330,40 @@ contract Houses {
             if (found) {
                 // TODO: currently, this leaves a gap (deleting simply makes element 0)
                 delete admins[index];
-                return true;
+                success = true;
+                return;
             }
         }
-        return false; 
+    }
+
+    /**
+     * Getter for host address of house.
+     *
+     * @param id Id of house to query.
+     * @return host Host address of the house.
+     */
+    function getHost(uint256 id) validHouse(id) public view 
+        returns (bool success, address host) {
+
+        success = false;
+
+        host = houses[id].host;
+        success = true;
+    }
+
+    /**
+     * Getter for active flag of house.
+     *
+     * @param id Id of house to query.
+     * @return active Active flag of the house.
+     */
+    function getActive(uint256 id) validHouse(id) public view 
+        returns (bool success, bool active) {
+
+        success = false;
+
+        active = houses[id].active;
+        success = true;
     }
 
     /**
@@ -352,9 +372,13 @@ contract Houses {
      * @param id Id of house to query.
      * @return bzzHash Swarm identifier of JSON file containing house info.
      */
-    function getBzzHash(uint256 id) validHouse(id) public view returns (bytes bzzHash) {
+    function getBzzHash(uint256 id) validHouse(id) public view 
+        returns (bool success, bytes bzzHash) {
 
-        return houses[id].bzzHash;
+        success = false;
+
+        bzzHash = houses[id].bzzHash;
+        success = true;
     }
 
     /**

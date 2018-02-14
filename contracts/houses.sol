@@ -150,7 +150,7 @@ contract Houses {
         okeyDokey = OkeyDokey(okeyDokeyAddress);
 
         devicesAddress = okeyDokey.getAddress(2);
-        devices = Devices(okeyDokeyAddress);
+        devices = Devices(devicesAddress);
 
         return true;
     }
@@ -211,7 +211,7 @@ contract Houses {
         // ex) if(house.bzzHash != bzzHash) ... 
         house.bzzHash = bzzHash;
 
-        /* iif gridId is different from previous one, update gridId */
+        /* If gridId is different from the previous one, update gridId */
         if(house.gridId != gridId) {
             /* remove house from previous grid group */
             removeFromGrid(house.gridId, house.id);
@@ -262,7 +262,7 @@ contract Houses {
             }
         }
 
-        /* double check if there exists house id in grid group */        
+        /* Double check if there exists house id in grid group */        
         require(toErase != houseIds.length);
 
         // TODO: currently, this leaves a gap (deleting simply makes element 0)

@@ -203,7 +203,7 @@ contract Reservations {
      * @return checkOut Time of check out, in milliseconds since UNIX epoch.
      * @return active Whether the listing is active.
      */
-    function getHouseInfo(uint256 _id) public view onlyGuests(_id)
+    function getReservationInfo(uint256 _id) public view onlyGuests(_id)
         returns (bool success, uint256 id, uint256 reservationCode, 
                  address host, address reserver, 
                  uint256 checkIn, uint256 checkOut, bool active) {

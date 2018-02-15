@@ -162,11 +162,11 @@ contract Reservations {
         /* Add host as guest as well */
         reservations[reservation.id].guests.push(msg.sender);
 
-        /* Save newly created house to storage. */
-        reservations[reservation.id] = reservation;
-
         /* Logistics */
         reservation.active = true;
+
+        /* Save newly created house to storage. */
+        reservations[reservation.id] = reservation;
 
         newId = reservation.id;
         success = true;

@@ -77,7 +77,7 @@ module.exports = async function(deployer) {
     const okdkReviews = await OkeyDokeyInst.getAddress(4).catch(error => {console.log(error);});
 
     var godCheck = (godOkdk == OkeyDokeyInst.address);
-    var okeyDokeyCheck1 = (okdkToken == Token.address);
+    var okeyDokeyCheck1 = (okdkToken == TokenInst.address);
     var okeyDokeyCheck2 = (okdkHouses == HousesInst.address);
     var okeyDokeyCheck3 = (okdkDevices == DevicesInst.address);
     var okeyDokeyCheck4 = (okdkReservations == ReservationsInst.address);

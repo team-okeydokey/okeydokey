@@ -36,7 +36,7 @@ contract Reservations {
     Houses private houses;
 
     /** Lifecycle of a reservation */
-    enum ReservationStates {RESERVED, COMMITTED, REJECTED, OVER}
+    enum ReservationStates {RESERVED, CONFIRMED, REJECTED, OVER}
 
     /** Structure of a reservation. */
     struct Reservation {
@@ -276,13 +276,13 @@ contract Reservations {
     } 
 
     /**
-     * Verify reservation. 
+     * Guest commits to the reservation. 
      *
      * @param id Id of the reservation.
      * @param valid Whether the guest will go through with the reservation.
      * @return success Whether the operation was successful.
      */
-    function commit(uint256 id, bool valid) public 
+    function confirm(uint256 id, bool valid) public onlyGuests(id) 
         returns (bool success) {
 
         success = false;
@@ -293,7 +293,7 @@ contract Reservations {
 
         if (withinTimeFrame) {
             if (valid) {
-                reservation.state = ReservationStates.COMMITTED;
+                reservation.state = ReservationStates.CONFIRMED;
                 // Release funds from escrow to host!
             } else {
                 reservation.state = ReservationStates.REJECTED;
@@ -320,7 +320,7 @@ contract Reservations {
 
         bool correctCode = (reservation.reservationCode == reservationCode);
         bool correctState = (reservation.state == ReservationStates.RESERVED) ||
-                            (reservation.state == ReservationStates.COMMITTED);
+                            (reservation.state == ReservationStates.CONFIRMED);
         bool found;
 
         /* Search for guest in already registered guest list */

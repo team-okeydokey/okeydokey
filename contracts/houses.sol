@@ -184,9 +184,6 @@ contract Houses {
         house.host = msg.sender;
         house.gridId = gridId;
 
-        /* Add host as administrator as well */
-        houses[house.id].administrators.push(msg.sender);
-
         /* Logistics */
         house.active = true;
         house.valid = true;
@@ -195,6 +192,9 @@ contract Houses {
         houses[house.id] = house;
         housesOf[msg.sender].push(house.id);
         housesInGrid[gridId].push(house.id);
+
+        /* add host as administrator as well */
+        houses[house.id].administrators.push(msg.sender);
 
         newId = house.id;
         // success = true;

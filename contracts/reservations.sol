@@ -313,6 +313,4 @@ contract Reservations {
         selfdestruct(admin); 
     }
 
-
-
 }

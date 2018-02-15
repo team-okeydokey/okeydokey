@@ -282,7 +282,7 @@ contract Reservations {
      * @param valid Whether the guest will go through with the reservation.
      * @return success Whether the operation was successful.
      */
-    function confirm(uint256 id, bool valid) public onlyGuests(id) 
+    function confirmReservation(uint256 id, bool valid) public onlyGuests(id) 
         returns (bool success) {
 
         success = false;

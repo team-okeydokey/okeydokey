@@ -35,6 +35,9 @@ contract Reservations {
     /** Instance of Houses contract. */
     Houses private houses;
 
+    /** Lifecycle of a reservation */
+    enum ReservationStates {RESERVED, COMMITTED, REJECTED, OVER}
+
     /** Structure of a reservation. */
     struct Reservation {
 
@@ -51,8 +54,7 @@ contract Reservations {
         uint256 checkOut;
 
         /* Logistics */
-        bool active;
-        bool committed;
+        ReservationStates state;
     }
 
 	/**
@@ -173,8 +175,7 @@ contract Reservations {
         reservation.reservationCode = reservationCode;
 
         /* Logistics */
-        reservation.active = true;
-        reservation.committed = false;
+        reservation.state = ReservationStates.RESERVED;
 
         /* Save newly created house to storage. */
         reservations[reservation.id] = reservation;
@@ -252,12 +253,12 @@ contract Reservations {
      * @return reserver Address of the reserver.
      * @return checkIn Time of check in, in milliseconds since UNIX epoch.
      * @return checkOut Time of check out, in milliseconds since UNIX epoch.
-     * @return active Whether the listing is active.
+     * @return state State of the reservation.
      */
     function getReservationInfo(uint256 _id) public view onlyGuests(_id)
         returns (bool success, uint256 id, bytes32 reservationCode, 
                  address host, address reserver, 
-                 uint256 checkIn, uint256 checkOut, bool active) {
+                 uint256 checkIn, uint256 checkOut, ReservationStates state) {
 
         success = false;
 
@@ -269,7 +270,7 @@ contract Reservations {
         reserver = reservation.reserver;
         checkIn = reservation.checkIn;
         checkOut = reservation.checkOut;
-        active = reservation.active;
+        state = reservation.state;
 
         success = true;
     } 
@@ -288,16 +289,15 @@ contract Reservations {
 
         Reservation storage reservation = reservations[id];
 
-        reservation.committed = valid;
-
         bool withinTimeFrame = now <= (reservation.checkIn + 1 days);
 
         if (withinTimeFrame) {
-            if (!valid) {
-                reservation.active = false;
-                // Refund!
-            } else {
+            if (valid) {
+                reservation.state = ReservationStates.COMMITTED;
                 // Release funds from escrow to host!
+            } else {
+                reservation.state = ReservationStates.REJECTED;
+                // Refund!
             }
             success = true;
         }
@@ -319,6 +319,8 @@ contract Reservations {
         Reservation storage reservation = reservations[resId]; 
 
         bool correctCode = (reservation.reservationCode == reservationCode);
+        bool correctState = (reservation.state == ReservationStates.RESERVED) ||
+                            (reservation.state == ReservationStates.COMMITTED);
         bool found;
 
         /* Search for guest in already registered guest list */
@@ -329,7 +331,7 @@ contract Reservations {
             }
         }
 
-        if (correctCode && reservation.active && !found) {
+        if (correctCode && correctState && !found) {
             reservation.guests.push(msg.sender);
             reservationsOf[msg.sender].push(reservation.id);
             id = reservation.id;

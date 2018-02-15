@@ -121,6 +121,14 @@ contract Houses {
     }
 
     /**
+     * Broadcast registration of new house.
+     *
+     * @param success Whether the registration was successful.
+     * @param id Id of the new house.
+     */
+     event NewHouse(bool success, uint256 id);
+
+    /**
      * Constrctor function.
      *
      * Assign contract owner (admin).
@@ -177,11 +185,6 @@ contract Houses {
         house.host = msg.sender;
         house.gridId = gridId;
 
-        /* Save newly created house to storage. */
-        houses[house.id] = house;
-        housesOf[msg.sender].push(house.id);
-        housesInGrid[gridId].push(house.id);
-
         /* Add host as administrator as well */
         houses[house.id].administrators.push(msg.sender);
 
@@ -189,9 +192,17 @@ contract Houses {
         house.active = true;
         house.valid = true;
 
-        success = true;
+        /* Save newly created house to storage. */
+        houses[house.id] = house;
+        housesOf[msg.sender].push(house.id);
+        housesInGrid[gridId].push(house.id);
+
         newId = house.id;
+        success = true;
+
+        // NewHouse(success, newId);
     } 
+    
     /**
      * Edit a listed house.
      *
@@ -230,7 +241,7 @@ contract Houses {
     /**
      * Remove houseId from grid.
      *
-     * Helper function for editHouse3. 
+     * Helper function for editHouse. 
      *
      * @param prevGridId The id of the grid to erase house from.
      * @param id The id of the house to erase.

@@ -116,8 +116,8 @@ contract Reservations {
      * Modifier for functions only house host(owner) can run.
      *
      * @param houseId The id of house to reserve.
-     * @param checkIn Time of checkin, in milliseconds from UNIX epoch.
-     * @param checkOut Time of checkOut, in milliseconds from UNIX epoch.
+     * @param checkIn Time of check in, in milliseconds since UNIX epoch.
+     * @param checkOut Time of check out, in milliseconds since UNIX epoch.
      * @return success Whether the reservation was successful.
      * @return newId Id of the created reservation.
      */
@@ -179,7 +179,7 @@ contract Reservations {
      * @param guest The second seed to randomize reservation code.
      * @param id The third seed to randomize reservation code.
      * @return success Whether the reservation was successful.
-     * @return reservationCode Generated random reservation code.
+     * @return reservationCode Randomly generated reservation code.
      */
 	function generateReservationCode(address host, address guest, uint256 id) 
         internal pure returns (bool success, uint256 reservationCode) {
@@ -189,4 +189,37 @@ contract Reservations {
 		reservationCode = 244110;
 		success = true;
 	}
+
+    /**
+     * Fetch reservation information.
+     *
+     * @param _id The id of the reservation to query.
+     * @return success Whether the query was successful.
+     * @return id Id of the reservation.
+     * @return reservationCode Randomly generated reservation code.
+     * @return host Address of the host.
+     * @return reserver Address of the reserver.
+     * @return checkIn Time of check in, in milliseconds since UNIX epoch.
+     * @return checkOut Time of check out, in milliseconds since UNIX epoch.
+     * @return active Whether the listing is active.
+     */
+    function getHouseInfo(uint256 _id) public view onlyGuests(_id)
+        returns (bool success, uint256 id, uint256 reservationCode, 
+                 address host, address reserver, 
+                 uint256 checkIn, uint256 checkOut, bool active) {
+
+        success = false;
+
+        Reservation storage reservation = reservations[_id]; 
+
+        id = reservation.id;
+        reservationCode = reservation.reservationCode;
+        host = reservation.host;
+        reserver = reservation.reserver;
+        checkIn = reservation.checkIn;
+        checkOut = reservation.checkOut;
+        active = reservation.active;
+
+        success = true;
+    } 
 }

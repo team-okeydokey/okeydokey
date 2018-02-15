@@ -11,8 +11,14 @@ contract Reservations {
     /** Running count of reservation ids. Smallest valid reservation index is 1. */
     uint256 reservationId = 0;
 
-    /** Map of house ids to each corresponding reservation. */
+    /** Map of reservation ids to each corresponding reservation. */
     mapping(uint256 => Reservation) private reservations;
+
+    /** Map of reservation code to each corresponding reservation. */
+    mapping(bytes32 => uint256) private reservationCodes;
+
+    /** Map of address to its reservations. */
+    mapping(address => uint256[]) private reservationsOf;
 
     /** Address of OkeyDokey contract. */
     address private okeyDokeyAddress;
@@ -26,14 +32,14 @@ contract Reservations {
     /** Instance of Houses contract. */
     Houses private houses;
 
-    /** Structure of a resevation. */
+    /** Structure of a reservation. */
     struct Reservation {
 
         uint256 id;
         uint256 houseId;
 
         /* Reservation info */
-        uint256 reservationCode;
+        bytes32 reservationCode;
         address host;
         address reserver;
         address[] guests;
@@ -160,13 +166,15 @@ contract Reservations {
         reservation.reservationCode = reservationCode;
 
         /* Add host as guest as well */
-        reservations[reservation.id].guests.push(msg.sender);
+        reservation.guests.push(msg.sender);
 
         /* Logistics */
         reservation.active = true;
 
         /* Save newly created house to storage. */
         reservations[reservation.id] = reservation;
+        reservationCodes[reservationCode] = reservation.id;
+        reservationsOf[msg.sender].push(reservation.id); 
 
         newId = reservation.id;
         success = true;
@@ -182,11 +190,12 @@ contract Reservations {
      * @return reservationCode Randomly generated reservation code.
      */
 	function generateReservationCode(address host, address guest, uint256 id) 
-        internal pure returns (bool success, uint256 reservationCode) {
+        internal pure returns (bool success, bytes32 reservationCode) {
 
 		success = false;
 
-		reservationCode = 244110;
+		reservationCode = keccak256(host, guest, id);
+
 		success = true;
 	}
 
@@ -204,7 +213,7 @@ contract Reservations {
      * @return active Whether the listing is active.
      */
     function getReservationInfo(uint256 _id) public view onlyGuests(_id)
-        returns (bool success, uint256 id, uint256 reservationCode, 
+        returns (bool success, uint256 id, bytes32 reservationCode, 
                  address host, address reserver, 
                  uint256 checkIn, uint256 checkOut, bool active) {
 
@@ -222,4 +231,40 @@ contract Reservations {
 
         success = true;
     } 
+
+    /**
+     * Fetch reservation information.
+     *
+     * @param reservationCode Randomly generated reservation code.
+     * @return success Whether the operation was successful.
+     * @return id Id of the reservation.
+     */
+    function registerAsGuest(bytes32 reservationCode) public 
+        returns (bool success, uint256 id) {
+
+        success = false;
+
+        uint256 resId = reservationCodes[reservationCode];
+        Reservation storage reservation = reservations[resId]; 
+
+        bool correctCode = (reservation.reservationCode == reservationCode);
+        bool found;
+
+        /* Search for guest in already registered guest list */
+        address[] storage guests = reservation.guests;
+        for (uint256 i=0; i < guests.length; i++) {
+            if (guests[i] == msg.sender) {
+                found = true;
+            }
+        }
+
+        if (correctCode && reservation.active && !found) {
+            reservation.guests.push(msg.sender);
+            reservationsOf[msg.sender].push(reservation.id);
+            id = reservation.id;
+            success = true;
+        }
+    } 
+
+
 }

@@ -20,6 +20,9 @@ contract Reservations {
     /** Map of address to its reservations. */
     mapping(address => uint256[]) private reservationsOf;
 
+    /** Map of house id to reservation ids. */
+    mapping(uint256 => uint256[]) private reservationsOn;
+
     /** Address of OkeyDokey contract. */
     address private okeyDokeyAddress;
 
@@ -129,6 +132,8 @@ contract Reservations {
      */
 	function reserve(uint256 houseId, uint256 checkIn, uint256 checkOut) 
 		public returns (bool success, uint256 newId) {
+
+        require(checkIn <= checkOut);
         	
         success = false;
         newId = 0;
@@ -138,20 +143,21 @@ contract Reservations {
 
         Reservation memory reservation;
 
+        /* Fetch house information and check if house is available. */
+        var (succ1, fetchedId, , host, active) = houses.getHouseInfo(houseId);
+        bool available = checkHouseAvailability(houseId, checkIn, checkOut);
+
+        if (!available || !succ1 || !active || (fetchedId != houseId)) {
+        	reservationId -= 1;
+        	return;
+        }
+
         /* Store reservation information. */
         reservation.id = reservationId;
         reservation.houseId = houseId;
         reservation.reserver = msg.sender;
         reservation.checkIn = checkIn;
         reservation.checkOut = checkOut;
-
-        /* Fetch house information. */
-        var (succ1, fetchedId, , host, active) = houses.getHouseInfo(houseId);
-
-        if (!succ1 || !active || (fetchedId != houseId)) {
-        	reservationId -= 1;
-        	return;
-        }
         
         /* Set host. */
         reservation.host = host;
@@ -165,9 +171,6 @@ contract Reservations {
         }
         reservation.reservationCode = reservationCode;
 
-        /* Add host as guest as well */
-        reservation.guests.push(msg.sender);
-
         /* Logistics */
         reservation.active = true;
 
@@ -175,13 +178,50 @@ contract Reservations {
         reservations[reservation.id] = reservation;
         reservationCodes[reservationCode] = reservation.id;
         reservationsOf[msg.sender].push(reservation.id); 
+        reservationsOn[houseId].push(reservation.id);
+
+        /* Add host as guest as well */
+        reservations[reservation.id].guests.push(msg.sender);
 
         newId = reservation.id;
         success = true;
 	}
 
+    /**
+     * Check if house is available for rent.
+     *
+     * @param houseId Id of the house to check.
+     * @param checkIn Time of check in, in milliseconds since UNIX epoch.
+     * @param checkOut Time of check out, in milliseconds since UNIX epoch.
+     * @return available Whether the house is available during the specified time window.
+     */
+    function checkHouseAvailability(uint256 houseId, uint256 checkIn, uint256 checkOut) 
+        internal view returns (bool available) {
+
+        available = false;
+
+        uint256[] storage reservationIds = reservationsOn[houseId];
+
+        for (uint256 i=0; i < reservationIds.length; i++) {
+            Reservation storage reservation = reservations[reservationIds[i]];
+
+            /* Look for overlap. */
+            bool checkInTooEarly = (reservation.checkIn <= checkIn) &&
+                                   (checkIn <= reservation.checkOut + 1 days);
+            bool checkOutTooLate = (reservation.checkIn - 1 days <= checkOut) &&
+                                   (checkOut <= reservation.checkOut);
+
+            if (checkInTooEarly || checkOutTooLate) {
+                return;
+            }
+        }
+        
+        /* Only assign available to true if we found no overlap. */
+        available = true;
+    }
+
 	/**
-     * Modifier for functions only house host(owner) can run.
+     * Generate a unique code for a reservation that acts as an invite.
      *
      * @param host The first seed to randomize reservation code.
      * @param guest The second seed to randomize reservation code.
@@ -265,6 +305,14 @@ contract Reservations {
             success = true;
         }
     } 
+
+    /**
+     * Self destruct.
+     */
+    function kill() system public { 
+        selfdestruct(admin); 
+    }
+
 
 
 }

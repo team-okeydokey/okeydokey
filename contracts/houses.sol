@@ -162,15 +162,16 @@ contract Houses {
      *
      * @param bzzHash Swarm identifier of JSON file containing house info.
      * @param gridId Id within the Earth's grid.
+     * @return success Whether the registration was successful.
      * @return newId Id of the new house. Must be greater than 0 to be considered valid.
      */
     function registerHouse(bytes bzzHash, uint256 gridId) 
-        public returns (uint256 newId) {
+        public returns (bool success, uint256 newId) {
 
         // TODO: more contraints
         // ex: require(bzzHash.length != 0);
         
-        // success = false;
+        success = false;
         newId = 0;
 
         /* Smallest houseId is 1 */
@@ -193,13 +194,13 @@ contract Houses {
         housesOf[msg.sender].push(house.id);
         housesInGrid[gridId].push(house.id);
 
-        /* add host as administrator as well */
+        /* Add host as administrator as well */
         houses[house.id].administrators.push(msg.sender);
 
         newId = house.id;
-        // success = true;
+        success = true;
 
-        // NewHouse(success, newId);
+        NewHouse(success, newId);
     } 
     
     /**

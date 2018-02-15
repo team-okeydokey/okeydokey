@@ -9,7 +9,7 @@ contract Test {
     
      A[] public array;
     
-    function checkStruct(uint index) public {
+    function checkStruct(uint index) public view {
         // A memory a = array[index];
          A storage a = array[index];
         

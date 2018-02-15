@@ -63,18 +63,18 @@ module.exports = async function(deployer) {
         // DevicesInst.initializeContracts(OkeyDokeyInst.address),
         ReservationsInst.initializeContracts(OkeyDokeyInst.address),
         // ReviewsInst.initializeContracts(OkeyDokeyInst.address)
-    ]).catch(function(error) {
+    ]).catch(error => {
         console.log(error);
     });
 
 
     // Check initialization.
-    const godOkdk = await OkeyDokeyGodInst.getAddress();
-    const okdkToken = await OkeyDokeyGodInst.getAddress(0);
-    const okdkHouses = await OkeyDokeyInst.getAddress(1);
-    const okdkDevices = await OkeyDokeyInst.getAddress(2);
-    const okdkReservations = await OkeyDokeyInst.getAddress(3);
-    const okdkReviews = await OkeyDokeyInst.getAddress(4);
+    const godOkdk = await OkeyDokeyGodInst.getAddress().catch(error => {console.log(error);});
+    const okdkToken = await OkeyDokeyGodInst.getAddress(0).catch(error => {console.log(error);});
+    const okdkHouses = await OkeyDokeyInst.getAddress(1).catch(error => {console.log(error);});
+    const okdkDevices = await OkeyDokeyInst.getAddress(2).catch(error => {console.log(error);});
+    const okdkReservations = await OkeyDokeyInst.getAddress(3).catch(error => {console.log(error);});
+    const okdkReviews = await OkeyDokeyInst.getAddress(4).catch(error => {console.log(error);});
 
     var godCheck = (godOkdk == OkeyDokeyInst.address);
     var okeyDokeyCheck1 = (okdkToken == Token.address);

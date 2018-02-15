@@ -52,6 +52,7 @@ contract Reservations {
 
         /* Logistics */
         bool active;
+        bool committed;
     }
 
 	/**
@@ -173,6 +174,7 @@ contract Reservations {
 
         /* Logistics */
         reservation.active = true;
+        reservation.committed = false;
 
         /* Save newly created house to storage. */
         reservations[reservation.id] = reservation;
@@ -270,6 +272,35 @@ contract Reservations {
         active = reservation.active;
 
         success = true;
+    } 
+
+    /**
+     * Verify reservation. 
+     *
+     * @param id Id of the reservation.
+     * @param valid Whether the guest will go through with the reservation.
+     * @return success Whether the operation was successful.
+     */
+    function commit(uint256 id, bool valid) public 
+        returns (bool success) {
+
+        success = false;
+
+        Reservation storage reservation = reservations[id];
+
+        reservation.committed = valid;
+
+        bool withinTimeFrame = now <= (reservation.checkIn + 1 days);
+
+        if (withinTimeFrame) {
+            if (!valid) {
+                reservation.active = false;
+                // Refund!
+            } else {
+                // Release funds from escrow to host!
+            }
+            success = true;
+        }
     } 
 
     /**

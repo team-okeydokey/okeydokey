@@ -151,7 +151,8 @@ contract Reservations {
         reservation.host = host;
 
         /* Assign reservation code. */
-        var (succ2, reservationCode) = generateReservationCode(msg.sender);
+        var (succ2, reservationCode) 
+            = generateReservationCode(msg.sender, host, reservationId);
         if (!succ2) {
         	reservationId -= 1;
         	return;
@@ -174,12 +175,14 @@ contract Reservations {
 	/**
      * Modifier for functions only house host(owner) can run.
      *
-     * @param seed The seed to randomize reservation code.
+     * @param host The first seed to randomize reservation code.
+     * @param guest The second seed to randomize reservation code.
+     * @param id The third seed to randomize reservation code.
      * @return success Whether the reservation was successful.
      * @return reservationCode Generated random reservation code.
      */
-	function generateReservationCode(address seed) internal pure
-		returns (bool success, uint256 reservationCode) {
+	function generateReservationCode(address host, address guest, uint256 id) 
+        internal pure returns (bool success, uint256 reservationCode) {
 
 		success = false;
 

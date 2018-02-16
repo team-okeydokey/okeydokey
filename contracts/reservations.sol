@@ -248,6 +248,7 @@ contract Reservations {
      * @param _id The id of the reservation to query.
      * @return success Whether the query was successful.
      * @return id Id of the reservation.
+     * @return houseId Id of the reserved house.
      * @return reservationCode Randomly generated reservation code.
      * @return host Address of the host.
      * @return reserver Address of the reserver.
@@ -256,8 +257,8 @@ contract Reservations {
      * @return state State of the reservation.
      */
     function getReservationInfo(uint256 _id) public view onlyGuests(_id)
-        returns (bool success, uint256 id, bytes32 reservationCode, 
-                 address host, address reserver, 
+        returns (bool success, uint256 id, uint256 houseId, 
+                 bytes32 reservationCode, address host, address reserver, 
                  uint256 checkIn, uint256 checkOut, ReservationStates state) {
 
         success = false;
@@ -265,6 +266,7 @@ contract Reservations {
         Reservation storage reservation = reservations[_id]; 
 
         id = reservation.id;
+        houseId = reservation.houseId;
         reservationCode = reservation.reservationCode;
         host = reservation.host;
         reserver = reservation.reserver;

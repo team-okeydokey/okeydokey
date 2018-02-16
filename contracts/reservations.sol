@@ -18,7 +18,7 @@ contract Reservations {
     mapping(bytes32 => uint256) private reservationCodes;
 
     /** Map of address to its reservations. */
-    mapping(address => uint256[]) private reservationsOf;
+    mapping(address => uint256[]) private reservationsBy;
 
     /** Map of house id to reservation ids. */
     mapping(uint256 => uint256[]) private reservationsOn;
@@ -180,7 +180,7 @@ contract Reservations {
         /* Save newly created house to storage. */
         reservations[reservation.id] = reservation;
         reservationCodes[reservationCode] = reservation.id;
-        reservationsOf[msg.sender].push(reservation.id); 
+        reservationsBy[msg.sender].push(reservation.id); 
         reservationsOn[houseId].push(reservation.id);
 
         /* Add host as guest as well */
@@ -333,7 +333,7 @@ contract Reservations {
 
         if (correctCode && correctState && !found) {
             reservation.guests.push(msg.sender);
-            reservationsOf[msg.sender].push(reservation.id);
+            reservationsBy[msg.sender].push(reservation.id);
             id = reservation.id;
             success = true;
         }

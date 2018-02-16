@@ -257,22 +257,20 @@ contract Reservations {
      * @return state State of the reservation.
      */
     function getReservationInfo(uint256 _id) public view onlyGuests(_id)
-        returns (bool success, uint256 id, uint256 houseId, 
+        returns (bool success, uint256 id, uint256 houseId,
                  bytes32 reservationCode, address host, address reserver, 
                  uint256 checkIn, uint256 checkOut, ReservationStates state) {
 
         success = false;
 
-        Reservation storage reservation = reservations[_id]; 
-
-        id = reservation.id;
-        houseId = reservation.houseId;
-        reservationCode = reservation.reservationCode;
-        host = reservation.host;
-        reserver = reservation.reserver;
-        checkIn = reservation.checkIn;
-        checkOut = reservation.checkOut;
-        state = reservation.state;
+        id = reservations[_id].id;
+        houseId = reservations[_id].houseId;
+        reservationCode = reservations[_id].reservationCode;
+        host = reservations[_id].host;
+        reserver = reservations[_id].reserver;
+        checkIn = reservations[_id].checkIn;
+        checkOut = reservations[_id].checkOut;
+        state = reservations[_id].state;
 
         success = true;
     } 

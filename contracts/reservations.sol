@@ -125,7 +125,7 @@ contract Reservations {
     }
         
     /**
-     * Modifier for functions only house host(owner) can run.
+     * Make a reservation.
      *
      * @param houseId The id of house to reserve.
      * @param checkIn Time of check in, in milliseconds since UNIX epoch.

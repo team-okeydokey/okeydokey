@@ -141,7 +141,7 @@ contract Reservations {
         success = false;
         newId = 0;
 
-        /* Smallest houseId is 1 */
+        /* Smallest reservationId is 1 */
         reservationId += 1;
 
         Reservation memory reservation;
@@ -177,13 +177,13 @@ contract Reservations {
         /* Logistics */
         reservation.state = ReservationStates.RESERVED;
 
-        /* Save newly created house to storage. */
+        /* Save newly created reservation to storage. */
         reservations[reservation.id] = reservation;
         reservationCodes[reservationCode] = reservation.id;
         reservationsBy[msg.sender].push(reservation.id); 
         reservationsAt[houseId].push(reservation.id);
 
-        /* Add host as guest as well */
+        /* Add reserver as guest as well */
         reservations[reservation.id].guests.push(msg.sender);
 
         newId = reservation.id;

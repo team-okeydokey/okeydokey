@@ -5,7 +5,7 @@ import "./houses.sol";
 
 contract Reservations {
 
-	/** Admin of this contract. */
+    /** Admin of this contract. */
     address private admin;
 
     /** Running count of reservation ids. Smallest valid reservation index is 1. */
@@ -21,7 +21,7 @@ contract Reservations {
     mapping(address => uint256[]) private reservationsBy;
 
     /** Map of house id to reservation ids. */
-    mapping(uint256 => uint256[]) private reservationsOn;
+    mapping(uint256 => uint256[]) private reservationsAt;
 
     /** Address of OkeyDokey contract. */
     address private okeyDokeyAddress;
@@ -57,7 +57,7 @@ contract Reservations {
         ReservationStates state;
     }
 
-	/**
+    /**
      * Modifier for functions only smart contract owner(admin) can run.
      */
     modifier system() {
@@ -75,12 +75,12 @@ contract Reservations {
      */
     modifier onlyGuests(uint256 id) {
 
-    	bool found = false;
+        bool found = false;
 
-    	/* Authorize host. */
-    	if (reservations[id].host == msg.sender) {
-    		found = true;
-    	}
+        /* Authorize host. */
+        if (reservations[id].host == msg.sender) {
+            found = true;
+        }
 
         /* Verify guest. */
         address[] storage guests = reservations[id].guests;
@@ -123,7 +123,7 @@ contract Reservations {
 
         return true;
     }
-		
+        
     /**
      * Modifier for functions only house host(owner) can run.
      *
@@ -133,11 +133,11 @@ contract Reservations {
      * @return success Whether the reservation was successful.
      * @return newId Id of the created reservation.
      */
-	function reserve(uint256 houseId, uint256 checkIn, uint256 checkOut) 
-		public returns (bool success, uint256 newId) {
+    function reserve(uint256 houseId, uint256 checkIn, uint256 checkOut) 
+        public returns (bool success, uint256 newId) {
 
         require(checkIn <= checkOut);
-        	
+            
         success = false;
         newId = 0;
 
@@ -151,8 +151,8 @@ contract Reservations {
         bool available = checkHouseAvailability(houseId, checkIn, checkOut);
 
         if (!available || !succ1 || !active || (fetchedId != houseId)) {
-        	reservationId -= 1;
-        	return;
+            reservationId -= 1;
+            return;
         }
 
         /* Store reservation information. */
@@ -169,8 +169,8 @@ contract Reservations {
         var (succ2, reservationCode) 
             = generateReservationCode(msg.sender, host, reservationId);
         if (!succ2) {
-        	reservationId -= 1;
-        	return;
+            reservationId -= 1;
+            return;
         }
         reservation.reservationCode = reservationCode;
 
@@ -181,14 +181,14 @@ contract Reservations {
         reservations[reservation.id] = reservation;
         reservationCodes[reservationCode] = reservation.id;
         reservationsBy[msg.sender].push(reservation.id); 
-        reservationsOn[houseId].push(reservation.id);
+        reservationsAt[houseId].push(reservation.id);
 
         /* Add host as guest as well */
         reservations[reservation.id].guests.push(msg.sender);
 
         newId = reservation.id;
         success = true;
-	}
+    }
 
     /**
      * Check if house is available for rent.
@@ -203,7 +203,7 @@ contract Reservations {
 
         available = false;
 
-        uint256[] storage reservationIds = reservationsOn[houseId];
+        uint256[] storage reservationIds = reservationsAt[houseId];
 
         for (uint256 i=0; i < reservationIds.length; i++) {
             Reservation storage reservation = reservations[reservationIds[i]];
@@ -223,7 +223,7 @@ contract Reservations {
         available = true;
     }
 
-	/**
+    /**
      * Generate a unique code for a reservation that acts as an invite.
      *
      * @param host The first seed to randomize reservation code.
@@ -232,15 +232,15 @@ contract Reservations {
      * @return success Whether the reservation was successful.
      * @return reservationCode Randomly generated reservation code.
      */
-	function generateReservationCode(address host, address guest, uint256 id) 
+    function generateReservationCode(address host, address guest, uint256 id) 
         internal pure returns (bool success, bytes32 reservationCode) {
 
-		success = false;
+        success = false;
 
-		reservationCode = keccak256(host, guest, id);
+        reservationCode = keccak256(host, guest, id);
 
-		success = true;
-	}
+        success = true;
+    }
 
     /**
      * Fetch reservation information.

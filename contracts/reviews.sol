@@ -46,10 +46,23 @@ contract Reviews {
     /**
      * Modifier for functions only smart contract owner(admin) can run.
      */
-    modifier system() {
+    modifier OkeyDokeyAdmin() {
 
         /* Verify admin. */
         require(admin == msg.sender);
+
+        _;
+    }
+
+    /**
+     * Modifier for functions only OkeyDokey smart contracts can run.
+     * 
+     * @param addr The address to check.
+     */
+    modifier system(address addr) {
+
+        /* Verify admin. */
+        require(okeyDokey.isOkeyDokeyContract(addr));
 
         _;
     }
@@ -70,7 +83,8 @@ contract Reviews {
      * @param _okeyDokeyAddress The address of main application contract.
      * @return success Whether the initialization was successful.
      */
-    function initializeContracts(address _okeyDokeyAddress) system public returns (bool success) {
+    function initializeContracts(address _okeyDokeyAddress) 
+        OkeyDokeyAdmin public returns (bool success) {
         require(_okeyDokeyAddress != 0);
         require(_okeyDokeyAddress != address(this));
 
@@ -143,7 +157,7 @@ contract Reviews {
     /**
      * Self destruct.
      */
-    function kill() system public { 
+    function kill() OkeyDokeyAdmin public { 
         selfdestruct(admin); 
     }
 

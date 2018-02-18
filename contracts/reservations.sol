@@ -60,10 +60,23 @@ contract Reservations {
     /**
      * Modifier for functions only smart contract owner(admin) can run.
      */
-    modifier system() {
+    modifier OkeyDokeyAdmin() {
 
         /* Verify admin. */
         require(admin == msg.sender);
+
+        _;
+    }
+
+    /**
+     * Modifier for functions only OkeyDokey smart contracts can run.
+     * 
+     * @param addr The address to check.
+     */
+    modifier system(address addr) {
+
+        /* Verify admin. */
+        require(okeyDokey.isOkeyDokeyContract(addr));
 
         _;
     }
@@ -111,7 +124,8 @@ contract Reservations {
      * @param _okeyDokeyAddress The address of main application contract.
      * @return success Whether the initialization was successful.
      */
-    function initializeContracts(address _okeyDokeyAddress) system public returns (bool success) {
+    function initializeContracts(address _okeyDokeyAddress) 
+        OkeyDokeyAdmin public returns (bool success) {
         require(_okeyDokeyAddress != 0);
         require(_okeyDokeyAddress != address(this));
 
@@ -340,9 +354,46 @@ contract Reservations {
     } 
 
     /**
+     * Check if guest address has access to house at current time.
+     *
+     * @param houseId House to check access to.
+     * @param guest Address of the guest to check for.
+     * @return authorized Whether the guest has access.
+     */
+    function isCurrentGuest(uint256 houseId, address guest) 
+        public system(msg.sender) view returns (bool authorized) {
+        require(guest != 0x0);
+        require(houseId > 0);
+
+        authorized = false;
+
+        uint256[] storage reservationIds = reservationsBy[guest];
+
+        for (uint256 i=0; i < reservationIds.length; i++) {
+
+            Reservation storage reservation = reservations[reservationIds[i]];
+
+            bool correctState = reservation.state == ReservationStates.RESERVED ||
+                                reservation.state == ReservationStates.CONFIRMED;
+
+            bool correctHouseId = reservation.houseId == houseId;
+
+            bool correctTime = reservation.checkIn <= now && 
+                               now <= reservation.checkOut;
+
+            if (correctState && correctHouseId && correctTime) {
+                authorized = true;
+                return;
+            }
+        }
+
+    } 
+
+
+    /**
      * Self destruct.
      */
-    function kill() system public { 
+    function kill() OkeyDokeyAdmin public { 
         selfdestruct(admin); 
     }
 

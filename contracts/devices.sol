@@ -15,10 +15,9 @@ contract Devices {
     /** Map of device address to each corresponding device. */
     mapping(address => Device) private devices;
 
-    // houseId => device addrs 
+    /** Map of house id to its device addresses */
     mapping(uint256 => address[]) private devicesOf;
     
-
     /** Address of OkeyDokey contract. */
     address private okeyDokeyAddress;
 
@@ -44,6 +43,7 @@ contract Devices {
     struct Device {
         // uint256 id;
         address addr;
+        address owner;
         uint256 houseId;
         
         uint256 deviceType; // (ex: 0: doorlock, 1: ...)
@@ -70,24 +70,37 @@ contract Devices {
     }
 
     /**
-     * Modifier to verify that device (caller) actually belongs to given house.
+     * Modifier to verify that device (caller) is registered to this contract.
      */
-    modifier validDevice(address addr) {
+    modifier isRegistered(address addr) {
 
-        require(devices[addr].addr != addr);
+        require(devices[addr].addr != 0);
 
         _;
     }
+
+
+    /**
+     * Modifier to verify that device (caller) belongs to a house.
+     * Premise: isRegistered() returns true.
+     */
+    modifier belongsToHouse(address addr) {
+        
+        require(devices[addr].houseId != 0);
+
+        _;
+    }
+    
 
     /**
      * Constrctor function.
      *
      * Assign contract owner (admin).
-     *
      */
     function Devices() public {
         admin = msg.sender;
     }
+    
     
     /**
      * Initialize other OKDK contracts this contract depends on.
@@ -111,48 +124,73 @@ contract Devices {
     }
 
 
-
     /**
-     * Verify the guest and the reservation before activating device. 
+     * Register device (caller) to this contract.
      *
-     * @param reservationId The id of reservation.
-     * @param guest The guest who is trying to activate the device. 
-     * @param currentTime The current time for user (in milliseconds since UNIX epoch).
-     * @return success Whether the activation was successful.
-     */
-    function verifyGuest(uint256 reservationId, address guest, uint256 currentTime) 
-        public returns (bool success) {
-        
-        success = false; 
-        
-        // check if guest is indeed the guest of the given reservation
-        // require(reservations.isGuest(reservationId, guest));
-
-        // TODO: ***** msg.sender is the device, so it won't work with current implementation. 
-        var (,, houseId,,, reserver, checkIn, checkOut, rState) = reservations.getReservationInfo(reservationId);
-
-        // check if caller(device) indeed belongs to the house specified in reservation
-        require(devices[msg.sender].houseId == houseId);
-
-        // check whether reservation state is CONFIRMED and currentTime is valid 
-        require(uint256(rState) == 1); 
-        require(checkIn <= currentTime && currentTime <= checkOut);
-
-        success = true;  
-    }
-    
-    /**
-     * Register device for a house. 
-     *
-     * @param houseId The Id of house to register device to. 
-     * @param deviceAddr The address of device to register.
+     * @param owner The address of the device owner. 
      * @param deviceType The type of device defined by okdk system. 
      * @param name The name of device.
      * @return success Whether the registration was successful.
      */
-    function registerDevice(uint256 houseId, address deviceAddr, uint256 deviceType, bytes32 name) 
+    function register(address owner, uint256 deviceType, bytes32 name) public 
+        returns (bool success) {
+
+        require(owner != 0);
+
+        Device memory device;
+        
+        device.addr = msg.sender;
+        device.owner = owner; 
+
+        device.deviceType = deviceType; 
+        device.name = name; 
+
+        devices[msg.sender] = device;
+
+        success = true; 
+
+    }
+
+
+    /**
+     * De-register device from this contract.
+     * ** caller must be the owner of the device.
+     *
+     * @param deviceAddr The address of device to de-register. 
+     * @return success Whether the registration was successful.
+     */
+    function deRegister(address deviceAddr) isRegistered(deviceAddr) public 
+        returns (bool success) {
+
+        success = false; 
+
+        // check if caller is the owner of the device
+        require(devices[deviceAddr].owner == msg.sender);
+
+        // if the device belongs to a house, remove from house first
+        if(devices[deviceAddr].houseId != 0) {
+            this.removeFromHouse(devices[deviceAddr].houseId, deviceAddr);
+        }
+
+        // remove device from the list
+        //TODO: need to test what this leaves after. 
+        delete devices[deviceAddr];
+
+        success = true; 
+
+    }
+
+
+
+    /**
+     * Add device to a house.
+     *
+     * @param houseId The address of the device owner. 
+     * @param deviceAddr The address of the device owner. 
+     * @return success Whether the operation was successful.
+     */
+    function addToHouse(uint256 houseId, address deviceAddr) isRegistered(deviceAddr) 
         public returns (bool success) {
-        //TODO: must check if given device actually belongs to the house
 
         success = false;
         
@@ -160,24 +198,85 @@ contract Devices {
 
         // verify caller is the host of the house
         require(msg.sender == host);
-    
-        Device memory device;
-        
-        device.addr = deviceAddr;
-        device.houseId = houseId; 
 
-        device.deviceType = deviceType; 
-        device.name = name; 
-        
-        device.state = DeviceStates.ACTIVE;
-
-        devices[deviceAddr] = device;
-        
-        
+        devices[deviceAddr].houseId = houseId; 
         devicesOf[houseId].push(deviceAddr);
-    
+
+        success = true; 
+
+    }
+
+
+    /**
+     * Remove device from a house.
+     *
+     * @param houseId The id of the house.
+     * @param deviceAddr The address of the device to remove.
+     * @return success Whether the operation was successful.
+     */
+    function removeFromHouse(uint256 houseId, address deviceAddr) belongsToHouse(deviceAddr) 
+        public returns (bool success) {
+
+        success = false;
+        
+        var (,,,host,) = houses.getHouseInfo(houseId);
+
+        // verify caller is the host of the house
+        require(msg.sender == host);
+
+        devices[deviceAddr].houseId = 0; 
+        
+        address[] storage houseDevices = devicesOf[houseId];
+        bool found = false;
+        uint256 index = 0;
+
+        for (uint256 i = 0; i < houseDevices.length; i++) {
+            if (houseDevices[i] == deviceAddr) {
+                found = true;
+                index = i;
+            }
+        }
+
+        if (found) {
+            // TODO: currently, this leaves a gap (deleting simply makes element 0)
+            delete houseDevices[index];
+            success = true;
+        }
+        
+    }
+
+
+    /**
+     * Edit device info (device type & name)
+     *
+     * @param deviceAddr The address of device to register.
+     * @param deviceType The type of device defined by okdk system. 
+     * @param name The name of device.
+     * @return success Whether the edit was successful.
+     */
+    function editDevice(address deviceAddr, uint256 deviceType, bytes32 name) 
+        belongsToHouse(deviceAddr) public returns (bool success) {
+
+        success = false;
+        
+        var (,,,host,) = houses.getHouseInfo(devices[deviceAddr].houseId);
+
+        // verify caller is the host of the house
+        require(msg.sender == host);
+
+        Device storage device = devices[deviceAddr]; 
+
+        if(device.deviceType != deviceType) {
+            device.deviceType = deviceType;
+        }
+
+        if(device.name != name) {
+            device.name = name; 
+        }
+        
         success = true; 
     }
+
 
     /**
      * Fetch device information.
@@ -190,7 +289,7 @@ contract Devices {
      * @return name The name of the device.
      * @return state The state of the device.
      */
-    function getDeviceInfo(address addr) validDevice(addr) public view
+    function getDeviceInfo(address addr) isRegistered(addr) public view
         returns (bool success, address deviceAddr, uint256 houseId, 
                 uint256 deviceType, bytes32 name, uint256 state) {
     
@@ -199,6 +298,8 @@ contract Devices {
         Device storage device = devices[addr]; 
 
         deviceAddr = device.addr;
+
+        // if device doesn't belong to any house, houseId will be 0 
         houseId = device.houseId;
 
         deviceType = device.deviceType;
@@ -207,5 +308,31 @@ contract Devices {
 
         success = true;
     } 
+    
+    
+    /**
+     * Verify the guest.
+     *
+     * @param guest The guest who is trying to activate the device. 
+     * @return success Whether the activation was successful.
+     */
+    function verifyGuest(address guest) belongsToHouse(msg.sender) public view returns (bool success) {
+        
+        success = false;
+
+        // check if guest is indeed authorized guest for the device's house 
+        if(reservations.isCurrentGuest(devices[msg.sender].houseId, guest)) {
+            success = true;    
+        }
+
+    }
+
+
+    /**
+     * Self destruct.
+     */
+    function kill() system public { 
+        selfdestruct(admin); 
+    }
 
 }

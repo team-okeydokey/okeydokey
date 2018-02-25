@@ -35,7 +35,7 @@ contract Presale {
         address ifSuccessfulSendTo,
         uint256 fundingGoalInEthers,
         uint256 durationInMinutes,
-        uint256 etherCostOfEachToken,
+        uint256 gweiCostOfEachToken,
         uint256 percentBonus,
         address addressOfTokenUsedAsReward
     ) {
@@ -49,7 +49,7 @@ contract Presale {
         fundingGoal = fundingGoalInEthers * 1 ether;
         startTime = now;
         deadline = now + durationInMinutes * 1 minutes;
-        price = etherCostOfEachToken * 1 ether;
+        price = gweiCostOfEachToken * 1 gwei;
         bonusRate = percentBonus;
         okeyDokeyToken = OkeyDokeyToken(addressOfTokenUsedAsReward);
     }
@@ -70,16 +70,16 @@ contract Presale {
         
         amountRaised += validEtherReceived;
         okeyDokeyToken.transfer(msg.sender, tokens);
-        TokenRewarded(msg.sender, amount);
+        TokenRewarded(msg.sender, tokens);
     }
 
     modifier afterDeadline() { if (now >= deadline) _; }
 
-    function calculateReward(address sender, uint256 amountSent) internal returns (uint256 tokens, uint256 validEther) {
+    function calculateReward(address sender, uint256 amountReceived) internal returns (uint256 tokens, uint256 validEther) {
         require(sender != address(0));
-        require(amountSent + amountRaised >= amountRaised); // Prevent overflow.
+        require(amountReceived + amountRaised >= amountRaised); // Prevent overflow.
         
-        uint256 totalReceived = amountSent + amountRaised;
+        uint256 totalReceived = amountReceived + amountRaised;
         
         if (totalReceived >= fundingGoal) {
             fundingGoalReached = true;
@@ -87,17 +87,16 @@ contract Presale {
             GoalReached(beneficiary, amountRaised);
             
             uint256 excess = totalReceived - fundingGoal; 
-            validEther = amountSent - excess;
+            validEther = amountReceived - excess;
             
             // Send excess ether back.
             sender.transfer(excess);
         } else {
-            validEther = amountSent;
+            validEther = amountReceived;
         }
         
         uint256 multiplier = (bonusRate + 100).div(100);
-        uint256 amountSentAfterBonus = validEther.mul(multiplier);
-        tokens = amountSentAfterBonus.div(price);
+        tokens = validEther.mul(multiplier).div(price);
     }
 
     /**

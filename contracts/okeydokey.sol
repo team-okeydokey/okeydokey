@@ -5,15 +5,18 @@ contract OkeyDokey {
     /** Admin of this contract. */
     address private admin;
 
+    /** Running count of contracts in the OkeyDokey ecosystem. */
+    uint16 private contractCount = 0;
+
     /** Address of contracts. 
-    * 
-    * 0 - OkeyDokeyToken.
-    * 1 - Houses.
-    * 2 - Devices.
-    * 3 - Reservations.
-    * 4 - Reviews.
-    *
-    */
+     * 
+     * 0 - OkeyDokeyToken.
+     * 1 - Houses.
+     * 2 - Devices.
+     * 3 - Reservations.
+     * 4 - Reviews.
+     *
+     */
     mapping (uint16 => address) private addresses;
 
     /**
@@ -34,8 +37,12 @@ contract OkeyDokey {
     function transferOwnership(address newAdmin) public returns (bool success) {
         require(newAdmin != 0x0);
         require(msg.sender == admin);
+
+        success = false;
+
         admin = newAdmin;
-        return true;
+        
+        success = true;
     }
 
     /**
@@ -46,7 +53,6 @@ contract OkeyDokey {
      */
     function getAddress(uint16 tag) public view returns (address contractAddr) {
         contractAddr = addresses[tag];
-        return contractAddr;
     }
 
     /**
@@ -58,10 +64,37 @@ contract OkeyDokey {
      */
     function updateAddress(uint16 tag, address newAddress) public returns (bool success) {
         require(msg.sender == admin);
+        require(newAddress != 0x0);
+
+        success = false;
+
+        if (addresses[tag] == 0x0) {
+            /* New contract. */
+            contractCount += 1;
+        }
 
         addresses[tag] = newAddress;
         
-        return true;
+        success = true;
+    }
+
+    /**
+     * Find out if address is a registered OkeyDokey contract
+     *
+     * @param addr The address to check.
+     * @return valid If the address is a registered OkeyDokey contract.
+     */
+    function isOkeyDokeyContract(address addr) public view returns (bool valid) {
+        require(addr != 0x0);
+
+        valid = false;
+
+        for (uint16 i=0; i < contractCount; i++) {
+            if (addresses[i] == addr) {
+                valid = true;
+                return;
+            }
+        }
     }
 
     /**

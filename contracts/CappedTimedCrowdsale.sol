@@ -31,7 +31,6 @@ contract CappedTimedCrowdsale is Crowdsale {
    */
   function CappedTimedCrowdsale(uint256 _cap, uint256 _openingTime, uint256 _closingTime) public {
     require(_cap > 0);
-    require(_openingTime >= now);
     require(_closingTime >= _openingTime);
 
     cap = _cap;

@@ -1,5 +1,5 @@
 # OkeyDokey
-Smart contracts for an automated hotel marketplace
+Sharing economy platform powered by IoT blockchain, featuring smart contract enmbedded smart locks to enable fully automated rental experience
 
 <p align="center">
   <img align="center" src="img/logo.png" width="532" height="184" alt="logo.png"/>

@@ -6,10 +6,10 @@ Sharing economy platform powered by IoT blockchain, featuring smart contract enm
 </p>
 
 # Whitepaper
-Read our [whitepaper](https://github.com/team-okeydokey/okeydokey/wiki/OKEYDOKEY-White-Paper)
+Read our [white paper](https://github.com/team-okeydokey/okeydokey/wiki/OKEYDOKEY-White-Paper).
 
 # KEY Token Supply and Distribution
-Learn more about our [Token Generation Event](https://github.com/team-okeydokey/okeydokey/wiki/OKEYDOKEY-Token-Generation-Event)
+Learn more about our [Token Generation Event](https://github.com/team-okeydokey/okeydokey/wiki/OKEYDOKEY-Token-Generation-Event).
 
 
 

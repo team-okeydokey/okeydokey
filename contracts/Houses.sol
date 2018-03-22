@@ -1,7 +1,7 @@
 pragma solidity ^0.4.19;
 
-import "./okeydokey.sol";
-import "./devices.sol";
+import "./OkeyDokey.sol";
+import "./Devices.sol";
 
 contract Houses {
 

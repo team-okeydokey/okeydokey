@@ -1,7 +1,7 @@
 pragma solidity ^0.4.19;
 
-import "./okeydokey.sol";
-import "./houses.sol";
+import "./OkeyDokey.sol";
+import "./Houses.sol";
 
 contract Reservations {
 

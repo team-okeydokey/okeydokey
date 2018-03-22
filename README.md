@@ -5,6 +5,14 @@ Sharing economy platform powered by IoT blockchain, featuring smart contract enm
   <img align="center" src="img/logo.png" width="532" height="184" alt="logo.png"/>
 </p>
 
+# Whitepaper
+Read our [white paper](https://github.com/team-okeydokey/okeydokey/wiki/OKEYDOKEY-White-Paper).
+
+# KEY Token Supply and Distribution
+Learn more about our [Token Generation Event](https://github.com/team-okeydokey/okeydokey/wiki/OKEYDOKEY-Token-Generation-Event).
+
+
+
 # Dependancies
 Install truffle:
 ```bash

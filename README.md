@@ -1,7 +1,7 @@
 # OkeyDokey
 OkeyDokey is an blockchain based door opening solutions platform designed for security and flexibility.
 
-# OkeyDokey's Unique Value
+### OkeyDokey's Unique Value
 OkeyDokey's unique value lies in blockchain based door opening solutions designed for security and to perform rental transactions. In terms of security, OkeyDokey Platform integrated smart locks and access control devices secured via smart contract and distributed ledger system that is practically impossible to hack. OkeyDokey also provides an ecosystem where smart locks and access control devices are able to perform secured and automated transaction involving digital payments to grant time-based access to guests via smart contracts.
 
 <p align="center">

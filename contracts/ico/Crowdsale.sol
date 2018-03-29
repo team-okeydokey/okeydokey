@@ -1,7 +1,7 @@
 pragma solidity ^0.4.19;
 
 import "./SafeMath.sol";
-import "./OkeyDokeyToken.sol";
+import "../token/OkeyDokeyToken.sol";
 
 /**
  * @title Crowdsale

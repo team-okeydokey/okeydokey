@@ -5,6 +5,12 @@ contract Facilities {
     /** Admin of this contract. */
     address private admin;
 
+    /** Address of OkeyDokey contract. */
+    address private okeyDokeyAddress;
+
+    /** Instance of OkeyDokey contract. */
+    OkeyDokey private okeyDokey;
+
     /** Addresses of owners to their facilities. */
     mapping (address => facilityId[]) private facilitiesOf;
 
@@ -19,6 +25,9 @@ contract Facilities {
 
     /** Guest address to his/her access ids. */
     mapping (address => bytes32[]) private accessesOf;
+
+    /** Facility id to Bzz hash containing extra info. */
+    mapping (bytes32 => bytes) private faciliyInfo;
 
     /** Definition of a facility. */
     struct Facility {
@@ -64,11 +73,29 @@ contract Facilities {
     }
 
     /**
+     * Initialize other OKDK contracts this contract depends on.
+     *
+     * @param _okeyDokeyAddress The address of main application contract.
+     * @return success Whether the initialization was successful.
+     */
+    function initializeContracts(address _okeyDokeyAddress) 
+        OkeyDokeyAdmin public returns (bool success) {
+        require(_okeyDokeyAddress != 0);
+        require(_okeyDokeyAddress != address(this));
+
+        okeyDokeyAddress = _okeyDokeyAddress;
+        okeyDokey = OkeyDokey(okeyDokeyAddress);
+
+        return true;
+    }
+
+    /**
      * Register a facility.
      *
      * @param bytes32 Name of the facility.
+     * @param bzzHash Swarm hash containing extra information about the facility.
      */
-    function registerFacility(bytes32 name) public {
+    function registerFacility(bytes32 name, bytes bzzHash) public {
         require(msg.sender == ownerOf[facilityId]);
 
         var facilityId = sha3(msg.sender, name);
@@ -85,6 +112,7 @@ contract Facilities {
         /* Save to memory. */
         facilities[facilityId] = facility;
         facilitiesOf[msg.sender].push(facilityId);
+        facilityInfo[facilityId].push(bzzHash);
     }
 
     /**

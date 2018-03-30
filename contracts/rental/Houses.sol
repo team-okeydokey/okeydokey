@@ -141,12 +141,12 @@ contract Houses is Facilities, Market {
         House memory house;
 
         registerFacility(name, bzzHash);
-        registerMarket(name, bzzHash);
+        registerItem(name, bzzHash);
 
         house.id = sha3(msg.sender, name);
         house.bzzHash = bzzHash;
         house.gridId = gridId;
-        
+
         /* Save newly created house to storage. */
         houses[house.id] = house;
         housesInGrid[gridId].push(house.id);

@@ -173,7 +173,7 @@ contract TokenERC20 {
 /*       ADVANCED TOKEN STARTS HERE       */
 /******************************************/
 
-contract OkeyDokeyToken is owned, TokenERC20 {
+contract KeyToken is owned, TokenERC20 {
 
     uint256 public sellPrice;
     uint256 public buyPrice;
@@ -184,7 +184,7 @@ contract OkeyDokeyToken is owned, TokenERC20 {
     event FrozenFunds(address target, bool frozen);
 
     /* Initializes contract with initial supply tokens to the creator of the contract */
-    function OkeyDokeyToken(
+    function KeyToken(
         uint256 initialSupply,
         string tokenName,
         string tokenSymbol

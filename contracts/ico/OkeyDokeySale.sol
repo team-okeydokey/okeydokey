@@ -34,7 +34,7 @@ contract OkeyDokeySale is Crowdsale {
      * @param _openingTime Crowdsale opening time
      * @param _closingTime Crowdsale closing time
      */
-    function OkeyDokeySale(uint256 _rate, address _wallet, OkeyDokeyToken _token, 
+    function OkeyDokeySale(uint256 _rate, address _wallet, KeyToken _token, 
                            uint256 _cap, uint256 _openingTime, uint256 _closingTime) 
                            Crowdsale(_rate, _wallet, _token) public {
         require(_cap > 0);

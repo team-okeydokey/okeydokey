@@ -1,6 +1,6 @@
 var OkeyDokeyGod = artifacts.require("OkeyDokeyGod");
 var OkeyDokey = artifacts.require("OkeyDokey");
-var Token = artifacts.require("OkeyDokeyToken");
+var Token = artifacts.require("KeyToken");
 var Houses = artifacts.require("Houses");
 var Devices = artifacts.require("Devices");
 var Reservations = artifacts.require("Reservations");

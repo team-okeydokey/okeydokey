@@ -4,7 +4,7 @@ import "../core/OkeyDokey.sol";
 import "../core/access/Facilities.sol";
 import "../core/market/Market.sol";
 
-contract Houses is Facilities, Market {
+contract HousesNew is Facilities, Market {
 
     /** Admin of this contract. */
     address private admin;

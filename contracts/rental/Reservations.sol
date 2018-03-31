@@ -269,7 +269,7 @@ contract Reservations {
      */
     function getReservationInfo(uint256 _id) public view onlyGuests(_id)
         returns (bool success, uint256 id, uint256 houseId,
-                 bytes32 reservationCode, address host, address reserver, 
+                 bytes32 reservationCode, address host, address reserver,
                  uint256 checkIn, uint256 checkOut, ReservationStates state) {
 
         success = false;

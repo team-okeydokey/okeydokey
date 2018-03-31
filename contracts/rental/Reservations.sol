@@ -57,7 +57,7 @@ contract Reservations {
         address reserver;
         address[] guests;
 
-        uint256 checkIn; /* Milliseconds since unix epoch */
+        uint256 checkIn; /* Seconds since unix epoch */
         uint256 checkOut;
 
         /* Logistics */
@@ -169,12 +169,12 @@ contract Reservations {
         Reservation memory reservation;
 
         /* Fetch house information and check if house is available. */
-        var (succ1, , , host, 
+        var (, , host, 
             hourlyRate, dailyRate, 
             utilityFee, cleaningFee, active) = houses.getHouseInfo(houseId);
         bool available = checkHouseAvailability(houseId, checkIn, checkOut);
 
-        if (!available || !succ1 || !active) {
+        if (!available || !active) {
             reservationId -= 1;
             return;
         }
@@ -211,7 +211,12 @@ contract Reservations {
         reservations[reservation.id].guests.push(msg.sender);
 
         /* Move tokens. */
-        token.transferFrom(msg.sender, host, 50);
+        // token.transferFrom(msg.sender, host, 
+        //     calculateReservationFee(
+        //         checkIn, checkOut,
+        //         hourlyRate, dailyRate, 
+        //         utilityFee, cleaningFee));
+        // token.transferFrom(msg.sender, host, 50);
 
         NewReservation(reservationId);
     }
@@ -220,8 +225,8 @@ contract Reservations {
      * Check if house is available for rent.
      *
      * @param houseId Id of the house to check.
-     * @param checkIn Time of check in, in milliseconds since UNIX epoch.
-     * @param checkOut Time of check out, in milliseconds since UNIX epoch.
+     * @param checkIn Time of check in, in seconds since UNIX epoch.
+     * @param checkOut Time of check out, in seconds since UNIX epoch.
      * @return available Whether the house is available during the specified time window.
      */
     function checkHouseAvailability(uint256 houseId, uint256 checkIn, uint256 checkOut) 
@@ -278,8 +283,8 @@ contract Reservations {
      * @return reservationCode Randomly generated reservation code.
      * @return host Address of the host.
      * @return reserver Address of the reserver.
-     * @return checkIn Time of check in, in milliseconds since UNIX epoch.
-     * @return checkOut Time of check out, in milliseconds since UNIX epoch.
+     * @return checkIn Time of check in, in seconds since UNIX epoch.
+     * @return checkOut Time of check out, in seconds since UNIX epoch.
      * @return state State of the reservation.
      */
     function getReservationInfo(uint256 _id) public view onlyGuests(_id)
@@ -401,6 +406,24 @@ contract Reservations {
 
     } 
 
+    /**
+     * Check if guest address has access to house at current time.
+     *
+     * @param checkIn Time of check in, in seconds since UNIX epoch.
+     * @param checkOut Time of check out, in seconds since UNIX epoch.
+     * @param hourlyRate Hourly fee in KEY tokens.
+     * @param dailyRate Daily fee in KEY tokens.
+     * @param utilityFee Utility fee in KEY tokens.
+     * @param cleaningFee Cleaning fee in KEY tokens.
+     * @return reservationFee Total cost of reservation.
+     */
+    function calculateReservationFee(uint256 checkIn, uint256 checkOut, 
+        uint256 hourlyRate, uint256 dailyRate, 
+        uint256 utilityFee, uint256 cleaningFee) 
+        public view returns (uint256 reservationFee) {
+
+        reservationFee = 50;
+    } 
 
     /**
      * Self destruct.

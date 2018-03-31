@@ -343,7 +343,6 @@ contract Houses {
      * Fetch house information.
      *
      * @param _id The id of the house to query.
-     * @return success Whether the query was successful.
      * @return id Id of the house.
      * @return bzzHash Swarm identifier of JSON file containing house info.
      * @return host Address of the host.
@@ -354,11 +353,9 @@ contract Houses {
      * @return active Whether the listing is active.
      */
     function getHouseInfo(uint256 _id) validHouse(_id) public view
-        returns (bool success, uint256 id, bytes bzzHash, 
+        returns (uint256 id, bytes bzzHash, 
                  address host, uint256 hourlyRate, uint256 dailyRate, 
                  uint256 utilityFee, uint256 cleaningFee, bool active) {
-
-        success = false;
 
         House storage house = houses[_id]; 
 
@@ -370,7 +367,6 @@ contract Houses {
         utilityFee = house.utilityFee;
         cleaningFee = house.cleaningFee;
         active = house.active;
-        success = true;
     } 
 
     /**

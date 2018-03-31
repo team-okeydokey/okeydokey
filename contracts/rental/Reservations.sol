@@ -109,6 +109,13 @@ contract Reservations {
     }
 
     /**
+     * Broadcast successful reservation.
+     *
+     * @param id Id of the reservation.
+     */
+     event NewReservation(uint256 id);
+
+    /**
      * Constrctor function.
      *
      * Assign contract owner (admin).
@@ -190,6 +197,8 @@ contract Reservations {
 
         /* Add reserver as guest as well */
         reservations[reservation.id].guests.push(msg.sender);
+
+        NewReservation(reservationId);
     }
 
     /**

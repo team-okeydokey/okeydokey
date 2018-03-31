@@ -169,12 +169,12 @@ contract Reservations {
         Reservation memory reservation;
 
         /* Fetch house information and check if house is available. */
-        var (succ1, fetchedId, , host, 
+        var (succ1, , , host, 
             hourlyRate, dailyRate, 
             utilityFee, cleaningFee, active) = houses.getHouseInfo(houseId);
         bool available = checkHouseAvailability(houseId, checkIn, checkOut);
 
-        if (!available || !succ1 || !active || (fetchedId != houseId)) {
+        if (!available || !succ1 || !active) {
             reservationId -= 1;
             return;
         }

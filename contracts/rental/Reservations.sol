@@ -156,8 +156,8 @@ contract Reservations {
      * Make a reservation.
      *
      * @param houseId The id of house to reserve.
-     * @param checkIn Time of check in, in milliseconds since UNIX epoch.
-     * @param checkOut Time of check out, in milliseconds since UNIX epoch.
+     * @param checkIn Time of check in, in seconds since UNIX epoch.
+     * @param checkOut Time of check out, in seconds since UNIX epoch.
      */
     function reserve(uint256 houseId, uint256 checkIn, uint256 checkOut) public {
 
@@ -169,7 +169,9 @@ contract Reservations {
         Reservation memory reservation;
 
         /* Fetch house information and check if house is available. */
-        var (succ1, fetchedId, , host, active) = houses.getHouseInfo(houseId);
+        var (succ1, fetchedId, , host, 
+            hourlyRate, dailyRate, 
+            utilityFee, cleaningFee, active) = houses.getHouseInfo(houseId);
         bool available = checkHouseAvailability(houseId, checkIn, checkOut);
 
         if (!available || !succ1 || !active || (fetchedId != houseId)) {
@@ -207,6 +209,9 @@ contract Reservations {
 
         /* Add reserver as guest as well */
         reservations[reservation.id].guests.push(msg.sender);
+
+        /* Move tokens. */
+        token.transferFrom(msg.sender, host, 50);
 
         NewReservation(reservationId);
     }

@@ -49,6 +49,12 @@ contract Houses {
         /* Location */
         uint256 gridId;
 
+        /* Prices */
+        uint256 hourlyRate;
+        uint256 dailyRate;
+        uint256 utilityFee;
+        uint256 cleaningFee;
+
         /* Logistics */
         bool active;
         bool valid;
@@ -172,9 +178,15 @@ contract Houses {
      *
      * @param bzzHash Swarm identifier of JSON file containing house info.
      * @param gridId Id within the Earth's grid.
+     * @param hourlyRate Hourly fee in KEY tokens.
+     * @param dailyRate Daily fee in KEY tokens.
+     * @param utilityFee Utility fee in KEY tokens.
+     * @param cleaningFee Cleaning fee in KEY tokens.
      * @return success Whether the registration was successful.
      */
-    function registerHouse(bytes bzzHash, uint256 gridId) public {
+    function registerHouse(bytes bzzHash, uint256 gridId, 
+                           uint256 hourlyRate, uint256 dailyRate, 
+                           uint256 utilityFee, uint256 cleaningFee) public {
 
         // TODO: more contraints
         // ex: require(bzzHash.length != 0);
@@ -193,6 +205,12 @@ contract Houses {
         /* Logistics */
         house.active = true;
         house.valid = true;
+
+        /* Prices */
+        house.hourlyRate = hourlyRate;
+        house.dailyRate = dailyRate;
+        house.utilityFee = utilityFee;
+        house.cleaningFee = cleaningFee;
 
         /* Save newly created house to storage. */
         houses[house.id] = house;
@@ -329,11 +347,16 @@ contract Houses {
      * @return id Id of the house.
      * @return bzzHash Swarm identifier of JSON file containing house info.
      * @return host Address of the host.
+     * @return hourlyRate Hourly fee in KEY tokens.
+     * @return dailyRate Daily fee in KEY tokens.
+     * @return utilityFee Utility fee in KEY tokens.
+     * @return cleaningFee Cleaning fee in KEY tokens.
      * @return active Whether the listing is active.
      */
     function getHouseInfo(uint256 _id) validHouse(_id) public view
         returns (bool success, uint256 id, bytes bzzHash, 
-                 address host, bool active) {
+                 address host, uint256 hourlyRate, uint256 dailyRate, 
+                 uint256 utilityFee, uint256 cleaningFee, bool active) {
 
         success = false;
 
@@ -342,6 +365,10 @@ contract Houses {
         id = house.id;
         bzzHash = house.bzzHash;
         host = house.host;
+        hourlyRate = house.hourlyRate;
+        dailyRate = house.dailyRate;
+        utilityFee = house.utilityFee;
+        cleaningFee = house.cleaningFee;
         active = house.active;
         success = true;
     } 

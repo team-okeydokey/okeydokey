@@ -194,7 +194,7 @@ contract Devices {
 
         success = false;
         
-        var (,,,host,) = houses.getHouseInfo(houseId);
+        var (,,,host,,,,,) = houses.getHouseInfo(houseId);
 
         // verify caller is the host of the house
         require(msg.sender == host);
@@ -219,7 +219,7 @@ contract Devices {
 
         success = false;
         
-        var (,,,host,) = houses.getHouseInfo(houseId);
+        var (,,,host,,,,,) = houses.getHouseInfo(houseId);
 
         // verify caller is the host of the house
         require(msg.sender == host);
@@ -259,7 +259,7 @@ contract Devices {
 
         success = false;
         
-        var (,,,host,) = houses.getHouseInfo(devices[deviceAddr].houseId);
+        var (,,,host,,,,,) = houses.getHouseInfo(devices[deviceAddr].houseId);
 
         // verify caller is the host of the house
         require(msg.sender == host);

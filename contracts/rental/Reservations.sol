@@ -122,7 +122,6 @@ contract Reservations {
      * Initialize other OKDK contracts this contract depends on.
      *
      * @param _okeyDokeyAddress The address of main application contract.
-     * @return success Whether the initialization was successful.
      */
     function initializeContracts(address _okeyDokeyAddress) 
         OkeyDokeyAdmin public returns (bool success) {
@@ -134,8 +133,6 @@ contract Reservations {
 
         housesAddress = okeyDokey.getAddress(1);
         houses = Houses(housesAddress);
-
-        return true;
     }
         
     /**
@@ -144,16 +141,10 @@ contract Reservations {
      * @param houseId The id of house to reserve.
      * @param checkIn Time of check in, in milliseconds since UNIX epoch.
      * @param checkOut Time of check out, in milliseconds since UNIX epoch.
-     * @return success Whether the reservation was successful.
-     * @return newId Id of the created reservation.
      */
-    function reserve(uint256 houseId, uint256 checkIn, uint256 checkOut) 
-        public returns (bool success, uint256 newId) {
+    function reserve(uint256 houseId, uint256 checkIn, uint256 checkOut) public {
 
         require(checkIn <= checkOut);
-            
-        success = false;
-        newId = 0;
 
         /* Smallest reservationId is 1 */
         reservationId += 1;
@@ -199,9 +190,6 @@ contract Reservations {
 
         /* Add reserver as guest as well */
         reservations[reservation.id].guests.push(msg.sender);
-
-        newId = reservation.id;
-        success = true;
     }
 
     /**

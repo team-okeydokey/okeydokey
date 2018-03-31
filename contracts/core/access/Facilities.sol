@@ -1,5 +1,7 @@
 pragma solidity ^0.4.19;
 
+import "../OkeyDokey.sol";
+
 contract Facilities {
 
     /** Admin of this contract. */
@@ -12,22 +14,25 @@ contract Facilities {
     OkeyDokey private okeyDokey;
 
     /** Addresses of owners to their facilities. */
-    mapping (address => facilityId[]) private facilitiesOf;
+    mapping (address => bytes32[]) internal facilitiesOf;
+
+    /** Facility id to address of owner. */
+    mapping (bytes32 => address) internal ownerOf;
 
     /** Facility ids to Facility instances. */
-    mapping (bytes32 => Facility) private facilities;
+    mapping (bytes32 => Facility) internal facilities;
 
     /** Zone ids to Zone objects. */
-    mapping (bytes32 => Zone) private zones;
+    mapping (bytes32 => Zone) internal zones;
 
     /** Access ids to Access objects. */
-    mapping (bytes32 => Access) private accesses;
+    mapping (bytes32 => Access) internal accesses;
 
     /** Guest address to his/her access ids. */
-    mapping (address => bytes32[]) private accessesOf;
+    mapping (address => bytes32[]) internal accessesOf;
 
     /** Facility id to Bzz hash containing extra info. */
-    mapping (bytes32 => bytes) private faciliyInfo;
+    mapping (bytes32 => bytes) internal facilityInfo;
 
     /** Definition of a facility. */
     struct Facility {
@@ -64,6 +69,17 @@ contract Facilities {
     }
 
     /**
+     * Modifier for functions only smart contract owner(admin) can run.
+     */
+    modifier OkeyDokeyAdmin() {
+
+        /* Verify admin. */
+        require(admin == msg.sender);
+
+        _;
+    }
+
+    /**
      * Constrctor function.
      *
      * Set the admin.
@@ -92,13 +108,12 @@ contract Facilities {
     /**
      * Register a facility.
      *
-     * @param bytes32 Name of the facility.
+     * @param name Name of the facility.
      * @param bzzHash Swarm hash containing extra information about the facility.
      */
     function registerFacility(bytes32 name, bytes bzzHash) public {
-        require(msg.sender == ownerOf[facilityId]);
 
-        var facilityId = sha3(msg.sender, name);
+        var facilityId = keccak256(msg.sender, name);
 
         if (hasFacilityId(msg.sender, facilityId)) {
             return;
@@ -112,7 +127,7 @@ contract Facilities {
         /* Save to memory. */
         facilities[facilityId] = facility;
         facilitiesOf[msg.sender].push(facilityId);
-        facilityInfo[facilityId].push(bzzHash);
+        facilityInfo[facilityId] = bzzHash;
     }
 
     /**
@@ -142,12 +157,12 @@ contract Facilities {
      * Designate a zone that actss as a unit of access.
      *
      * @param facilityId Id of the facility the zone belongs to.
-     * @param bytes32 Name of the zone.
+     * @param name Name of the zone.
      */
     function defineZone(bytes32 facilityId, bytes32 name) public {
         require(msg.sender == ownerOf[facilityId]);
 
-        var zoneId = sha3(facilityId, name);
+        var zoneId = keccak256(facilityId, name);
 
         if (hasZoneId(facilityId, zoneId)) {
             return;
@@ -161,7 +176,7 @@ contract Facilities {
 
         /* Save to memory. */
         zones[zoneId] = zone;
-        facilities[facilityId].zones.push(zone);
+        facilities[facilityId].zones.push(zoneId);
     }
 
     /**
@@ -193,7 +208,6 @@ contract Facilities {
      * Give zone access to guest.
      *
      * @param guest Address of guest.
-     * @param facilityId Id of the facility.
      * @param zoneId Id of the zone.
      * @param isTemporary Whether the access is timed.
      * @param begin Time when access starts, in seconds since UNIX epoch,
@@ -203,12 +217,12 @@ contract Facilities {
      * @param count Number of times accessed.
      */
     function grantAccess(address guest, bytes32 zoneId, 
-                         bool isTemporary, uint256 begin, int256 end, 
+                         bool isTemporary, uint256 begin, uint256 end, 
                          bool hasLimit, uint256 limit, uint256 count) public {
 
-        require(msg.sender == ownerOf[facilityId]);
+        require(msg.sender == ownerOf[zones[zoneId].facilityId]);
 
-        var accessId = sha3(guest, facilityId, zoneId);
+        var accessId = keccak256(guest, zoneId, begin, end);
 
         /* Create new access instance. */
         Access memory access;
@@ -232,7 +246,7 @@ contract Facilities {
      *
      * @return accessIds Array of access ids.
      */
-    function getMyAccesses() public returns bytes32[] {
+    function getMyAccesses() public returns (bytes32[] accessIds) {
 
         return accessesOf[msg.sender];
     }
@@ -251,7 +265,7 @@ contract Facilities {
      */
     function getAccessInfo(bytes32 accessId) public view 
         returns (bytes32 zoneId, 
-                 bool isTemporary, uint256 begin, int256 end, 
+                 bool isTemporary, uint256 begin, uint256 end, 
                  bool hasLimit, uint256 limit, uint256 count){
 
         Access storage access = accesses[accessId];
@@ -271,16 +285,18 @@ contract Facilities {
      * @param guest Address to check for.
      * @param zoneId Id of the zone.
      * @return hasAccess Whether the guest address has current access.
+     * @return bytes32 Id of Access object, if it exists.
      */
     function verifyAccess(address guest, bytes32 zoneId) 
-        public view returns (bool hasAccess) {
+        public view returns (bool hasAccess, bytes32 accessId) {
 
-        bytes32[] storage accessIds = accesses[guest];
+        bytes32[] storage accessIds = accessesOf[guest];
 
         hasAccess = false;
 
         for (uint256 i=0; i < accessIds.length; i++) {
-            var access = accessIds[i];
+            var id = accessIds[i];
+            var access = accesses[id];
 
             if (access.zoneId == zoneId) {
 
@@ -294,6 +310,7 @@ contract Facilities {
 
                 if (timeValid && limitValid) {
                     hasAccess = true;
+                    accessId = access.id;
                     return;
                 }
             }
@@ -304,15 +321,22 @@ contract Facilities {
      * Override to define access actions.
      *
      * @param guest Address to check for.
-     * @param zoneId Id of the zone.
-     * @return hasAccess Whether the .
+     * @param zoneId Id of the zone .
      */
-    function access(address guest, bytes32 zoneId) public {
+    function accessAction(address guest, bytes32 zoneId) public {
 
-        Access storage access = accesses[accessId];
+        bool hasAccess;
+        bytes32 accessId;
+        (hasAccess, accessId) = verifyAccess(guest, zoneId);
+
+        if (hasAccess) {
+
+            Access storage access = accesses[accessId];
         
-        if (access.hasLimit) {
-            access.count += 1;
+            if (access.hasLimit) {
+                access.count += 1;
+            }
+
         }
     } 
 

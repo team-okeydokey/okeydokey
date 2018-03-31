@@ -1,7 +1,8 @@
 pragma solidity ^0.4.19;
 
 import "../core/OkeyDokey.sol";
-import "../core/Facilities.sol";
+import "../core/access/Facilities.sol";
+import "../core/market/Market.sol";
 
 contract Houses is Facilities, Market {
 
@@ -12,7 +13,7 @@ contract Houses is Facilities, Market {
     mapping(bytes32 => House) private houses;
 
     /** Map of a grid's id to houses located in that particular grid. */
-    mapping(bytes32 => bytes32[]) private housesInGrid;
+    mapping(uint256 => bytes32[]) private housesInGrid;
 
     /** Address of OkeyDokey contract. */
     address private okeyDokeyAddress;
@@ -61,12 +62,10 @@ contract Houses is Facilities, Market {
      *
      * @param id The id of house being manipulated.
      */
-    modifier onlyHost(uint256 id) {
-
-        require(0 < id && id <= houseId);
+    modifier onlyHost(bytes32 id) {
 
         /* Verify owner. */
-        require(houses[id].host == msg.sender);
+        require(facilities[id].owner == msg.sender);
 
         _;
     }
@@ -76,23 +75,21 @@ contract Houses is Facilities, Market {
      * 
      * @param id The id of house being manipulated.
      */
-    modifier onlyAdmins(uint256 id) {
-
-        require(0 < id && id <= houseId);
+    // modifier onlyAdmins(bytes32 id) {
         
-        /* Search for admin address. */
-        bool found = false;
-        address[] storage admins = houses[id].administrators;
-        for (uint256 i=0; i < admins.length; i++) {
-            if (admins[i] == msg.sender) {
-                found = true;
-            }
-        }
+    //     /* Search for admin address. */
+    //     bool found = false;
+    //     address[] storage admins = houses[id].administrators;
+    //     for (uint256 i=0; i < admins.length; i++) {
+    //         if (admins[i] == msg.sender) {
+    //             found = true;
+    //         }
+    //     }
 
-        require(found);
+    //     require(found);
 
-        _;
-    }
+    //     _;
+    // }
 
     /**
      * Broadcast registration of new house.
@@ -141,9 +138,9 @@ contract Houses is Facilities, Market {
         House memory house;
 
         registerFacility(name, bzzHash);
-        registerItem(name, bzzHash);
+        // registerItem(name, bzzHash);
 
-        house.id = sha3(msg.sender, name);
+        house.id = keccak256(msg.sender, name);
         house.bzzHash = bzzHash;
         house.gridId = gridId;
 

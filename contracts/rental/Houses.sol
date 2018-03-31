@@ -136,10 +136,9 @@ contract Houses {
     /**
      * Broadcast registration of new house.
      *
-     * @param success Whether the registration was successful.
      * @param id Id of the new house.
      */
-     event NewHouse(bool success, uint256 id);
+     event NewHouse(uint256 id);
 
     /**
      * Constrctor function.
@@ -155,9 +154,8 @@ contract Houses {
      * Initialize other OKDK contracts this contract depends on.
      *
      * @param _okeyDokeyAddress The address of main application contract.
-     * @return success Whether the initialization was successful.
      */
-    function initializeContracts(address _okeyDokeyAddress) 
+    function initializeContracts(address _okeyDokeyAddress)
         OkeyDokeyAdmin public returns (bool success) {
         require(_okeyDokeyAddress != 0);
         require(_okeyDokeyAddress != address(this));
@@ -167,8 +165,6 @@ contract Houses {
 
         devicesAddress = okeyDokey.getAddress(2);
         devices = Devices(devicesAddress);
-
-        return true;
     }
 
     /**
@@ -177,16 +173,11 @@ contract Houses {
      * @param bzzHash Swarm identifier of JSON file containing house info.
      * @param gridId Id within the Earth's grid.
      * @return success Whether the registration was successful.
-     * @return newId Id of the new house. Must be greater than 0 to be considered valid.
      */
-    function registerHouse(bytes bzzHash, uint256 gridId) 
-        public returns (bool success, uint256 newId) {
+    function registerHouse(bytes bzzHash, uint256 gridId) public {
 
         // TODO: more contraints
         // ex: require(bzzHash.length != 0);
-        
-        success = false;
-        newId = 0;
 
         /* Smallest houseId is 1 */
         houseId += 1;
@@ -211,10 +202,7 @@ contract Houses {
         /* Add host as administrator as well */
         houses[house.id].administrators.push(msg.sender);
 
-        newId = house.id;
-        success = true;
-
-        NewHouse(success, newId);
+        NewHouse(houseId);
     } 
     
     /**
@@ -223,12 +211,8 @@ contract Houses {
      * @param id The id of the house to edit.
      * @param bzzHash Swarm identifier of JSON file containing house info.
      * @param gridId Id within the Earth's grid.
-     * @return success Whether the edit was successful.
      */
-    function editHouse(uint256 id, bytes bzzHash, uint256 gridId) 
-        onlyAdmins(id) public returns (bool success) {
-
-        success = false;
+    function editHouse(uint256 id, bytes bzzHash, uint256 gridId) onlyAdmins(id) public {
 
         House storage house = houses[id]; 
 
@@ -237,18 +221,15 @@ contract Houses {
         /* If gridId is different from the previous one, update gridId */
         if(house.gridId != gridId) {
             /* Remove house from previous grid group */
-            bool succ = removeFromGrid(house.gridId, house.id);
+            removeFromGrid(house.gridId, house.id);
 
-            if (succ) {
+            /* Add house to new grid group. */
+            housesInGrid[gridId].push(house.id);
 
-                /* Add house to new grid group. */
-                housesInGrid[gridId].push(house.id);
-    
-                /* Update location. */
-                house.gridId = gridId;
+            /* Update location. */
+            house.gridId = gridId;
 
-                success = true;
-            }
+            return;
         }
     }
 
@@ -261,10 +242,7 @@ contract Houses {
      * @param id The id of the house to erase.
      * @return success Whether the operation was successful.
      */
-    function removeFromGrid(uint256 prevGridId, uint256 id) 
-        internal returns (bool success) {
-
-        success = false;
+    function removeFromGrid(uint256 prevGridId, uint256 id) internal {
 
         uint256[] storage houseIds = housesInGrid[prevGridId];
         uint256 toErase;
@@ -279,8 +257,6 @@ contract Houses {
 
         // TODO: currently, this leaves a gap (deleting simply makes element 0)
         delete houseIds[toErase];
-
-        success = true;
     }
 
     /**
@@ -288,12 +264,8 @@ contract Houses {
      *
      * @param id Id of house to edit.
      * @param newAdmin The address of new admin.
-     * @return success Whether adding was successful.
      */
-    function addAdministrator(uint256 id, address newAdmin) 
-        onlyHost(id) public returns (bool success) {
-
-        success = false;
+    function addAdministrator(uint256 id, address newAdmin) onlyHost(id) public {
 
         House storage house = houses[id];
 
@@ -312,7 +284,6 @@ contract Houses {
 
             if (!found) {
                 house.administrators.push(newAdmin);
-                success = true;
                 return;
             }
         }
@@ -323,12 +294,8 @@ contract Houses {
      *
      * @param id Id of house to query.
      * @param toDelete The address of admin to delete.
-     * @return success Whether the operation was successful.
      */
-    function removeAdministrator(uint256 id, address toDelete) 
-        onlyHost(id) public returns (bool success) {
-
-        success = false;
+    function removeAdministrator(uint256 id, address toDelete) onlyHost(id) public {
 
         House storage house = houses[id];
 
@@ -349,7 +316,6 @@ contract Houses {
             if (found) {
                 // TODO: currently, this leaves a gap (deleting simply makes element 0)
                 delete admins[index];
-                success = true;
                 return;
             }
         }

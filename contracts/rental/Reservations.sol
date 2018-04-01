@@ -444,16 +444,16 @@ contract Reservations is tokenRecipient {
         (, , host, hourlyRate, dailyRate, 
             utilityFee, cleaningFee, active) = houses.getHouseInfo(houseId);
 
-        assert(!active);
+        assert(active);
 
         uint256 reservationFee = calculateReservationFee(checkIn, checkOut,
             hourlyRate, dailyRate, utilityFee, cleaningFee);
 
-        assert(reservationFee >= _value);
+        assert(_value >= reservationFee);
 
-        token.transferFrom(_from, host, reservationFee);
-
-        _reserve(_from, houseId, checkIn, checkOut);
+        if (token.transferFrom(_from, host, reservationFee)) {
+            _reserve(_from, houseId, checkIn, checkOut);
+        }
     } 
 
     /**
@@ -468,8 +468,8 @@ contract Reservations is tokenRecipient {
         returns (uint256 houseId, uint256 checkIn, uint256 checkOut) {
 
         houseId = 1;
-        checkIn = 120;
-        checkOut = 123;
+        checkIn = 1522622157;
+        checkOut = 1522682157;
     }
 
     /**

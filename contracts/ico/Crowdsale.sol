@@ -1,6 +1,6 @@
 pragma solidity ^0.4.19;
 
-import "./SafeMath.sol";
+import "../libs/SafeMath.sol";
 import "../token/KeyToken.sol";
 
 /**

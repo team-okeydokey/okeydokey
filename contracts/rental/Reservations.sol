@@ -4,7 +4,7 @@ import "../core/OkeyDokey.sol";
 import "../token/KeyToken.sol";
 import "./Houses.sol";
 
-contract Reservations {
+contract Reservations is tokenRecipient {
 
     /** Admin of this contract. */
     address private admin;
@@ -155,11 +155,13 @@ contract Reservations {
     /**
      * Make a reservation.
      *
+     * @param guest The address of reserver.
      * @param houseId The id of house to reserve.
      * @param checkIn Time of check in, in seconds since UNIX epoch.
      * @param checkOut Time of check out, in seconds since UNIX epoch.
      */
-    function reserve(uint256 houseId, uint256 checkIn, uint256 checkOut) public {
+    function _reserve(address guest, uint256 houseId, 
+        uint256 checkIn, uint256 checkOut) internal {
 
         require(checkIn <= checkOut);
 
@@ -169,9 +171,7 @@ contract Reservations {
         Reservation memory reservation;
 
         /* Fetch house information and check if house is available. */
-        var (, , host, 
-            hourlyRate, dailyRate, 
-            utilityFee, cleaningFee, active) = houses.getHouseInfo(houseId);
+        var (, , host, , , , , active) = houses.getHouseInfo(houseId);
         bool available = checkHouseAvailability(houseId, checkIn, checkOut);
 
         if (!available || !active) {
@@ -182,7 +182,7 @@ contract Reservations {
         /* Store reservation information. */
         reservation.id = reservationId;
         reservation.houseId = houseId;
-        reservation.reserver = msg.sender;
+        reservation.reserver = guest;
         reservation.checkIn = checkIn;
         reservation.checkOut = checkOut;
         
@@ -191,7 +191,7 @@ contract Reservations {
 
         /* Assign reservation code. */
         var (succ2, reservationCode) 
-            = generateReservationCode(msg.sender, host, reservationId);
+            = generateReservationCode(guest, host, reservationId);
         if (!succ2) {
             reservationId -= 1;
             return;
@@ -204,19 +204,11 @@ contract Reservations {
         /* Save newly created reservation to storage. */
         reservations[reservation.id] = reservation;
         reservationCodes[reservationCode] = reservation.id;
-        reservationsBy[msg.sender].push(reservation.id); 
+        reservationsBy[guest].push(reservation.id); 
         reservationsAt[houseId].push(reservation.id);
 
         /* Add reserver as guest as well */
-        reservations[reservation.id].guests.push(msg.sender);
-
-        /* Move tokens. */
-        // token.transferFrom(msg.sender, host, 
-        //     calculateReservationFee(
-        //         checkIn, checkOut,
-        //         hourlyRate, dailyRate, 
-        //         utilityFee, cleaningFee));
-        // token.transferFrom(msg.sender, host, 50);
+        reservations[reservation.id].guests.push(guest);
 
         NewReservation(reservationId);
     }
@@ -424,6 +416,61 @@ contract Reservations {
 
         reservationFee = 50;
     } 
+
+    /**
+     * Callback function for approveAndCall.
+     *
+     * @param _from Guest that wants to reserve.
+     * @param _value Amount of token sent to the contract.
+     * @param _token Address of KEY token.
+     * @param _extraData Data containing house id, checkin time,and check out time.
+     */
+    function receiveApproval(address _from, uint256 _value, 
+        address _token, bytes _extraData) public {
+
+        require(tokenAddress == _token);
+
+        uint256 houseId;
+        uint256 checkIn;
+        uint256 checkOut;
+        (houseId, checkIn, checkOut) = _decodeReservationData(_extraData);
+
+        address host;
+        uint256 hourlyRate;
+        uint256 dailyRate;
+        uint256 utilityFee;
+        uint256 cleaningFee;
+        bool active;
+        (, , host, hourlyRate, dailyRate, 
+            utilityFee, cleaningFee, active) = houses.getHouseInfo(houseId);
+
+        assert(!active);
+
+        uint256 reservationFee = calculateReservationFee(checkIn, checkOut,
+            hourlyRate, dailyRate, utilityFee, cleaningFee);
+
+        assert(reservationFee >= _value);
+
+        token.transferFrom(_from, host, reservationFee);
+
+        _reserve(_from, houseId, checkIn, checkOut);
+    } 
+
+    /**
+     * Decode extra data in approveAndCall to reservation data.
+     *
+     * @param data Data containing house id, checkin time,and check out time.
+     * @return houseId House id.
+     * @return checkIn Chek in date.
+     * @return checkOut Check out date.
+     */
+    function _decodeReservationData(bytes data) internal pure 
+        returns (uint256 houseId, uint256 checkIn, uint256 checkOut) {
+
+        houseId = 1;
+        checkIn = 120;
+        checkOut = 123;
+    }
 
     /**
      * Self destruct.

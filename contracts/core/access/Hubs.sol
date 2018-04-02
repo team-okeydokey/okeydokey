@@ -62,7 +62,7 @@ contract Hubs {
      */
     function initializeContracts(address _okeyDokeyAddress) 
         OkeyDokeyAdmin public returns (bool success) {
-        require(_okeyDokeyAddress != 0);
+        require(_okeyDokeyAddress != address(0));
         require(_okeyDokeyAddress != address(this));
 
         okeyDokeyAddress = _okeyDokeyAddress;

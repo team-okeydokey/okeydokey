@@ -30,10 +30,10 @@ contract Devices {
     /** Instance of Reservations contract. */
     Reservations private reservations;
 
-    /** Address of Reservations contract. */
+    /** Address of Houses contract. */
     address private housesAddress;
 
-    /** Instance of Reservations contract. */
+    /** Instance of Houses contract. */
     Houses private houses;
 
     /** Device states */
@@ -74,7 +74,7 @@ contract Devices {
      */
     modifier isRegistered(address addr) {
 
-        require(devices[addr].addr != 0);
+        require(devices[addr].addr != address(0));
 
         _;
     }
@@ -111,11 +111,14 @@ contract Devices {
     function initializeContracts(address _okeyDokeyAddress) system public 
         returns (bool success) {
             
-        require(_okeyDokeyAddress != 0);
+        require(_okeyDokeyAddress != address(0));
         require(_okeyDokeyAddress != address(this));
 
         okeyDokeyAddress = _okeyDokeyAddress;
         okeyDokey = OkeyDokey(okeyDokeyAddress);
+
+        housesAddress = okeyDokey.getAddress(1);
+        houses = Houses(housesAddress);
 
         reservationsAddress = okeyDokey.getAddress(3);
         reservations = Reservations(reservationsAddress);
@@ -130,12 +133,10 @@ contract Devices {
      * @param owner The address of the device owner. 
      * @param deviceType The type of device defined by okdk system. 
      * @param name The name of device.
-     * @return success Whether the registration was successful.
      */
-    function register(address owner, uint256 deviceType, bytes32 name) public 
-        returns (bool success) {
+    function register(address owner, uint256 deviceType, bytes32 name) public {
 
-        require(owner != 0);
+        require(owner != address(0));
 
         Device memory device;
         
@@ -146,9 +147,6 @@ contract Devices {
         device.name = name; 
 
         devices[msg.sender] = device;
-
-        success = true; 
-
     }
 
 
@@ -185,25 +183,18 @@ contract Devices {
     /**
      * Add device to a house.
      *
-     * @param houseId The address of the device owner. 
-     * @param deviceAddr The address of the device owner. 
-     * @return success Whether the operation was successful.
+     * @param houseId Id of the house to add this device. 
+     * @param deviceAddr The address of the device. 
      */
-    function addToHouse(uint256 houseId, address deviceAddr) isRegistered(deviceAddr) 
-        public returns (bool success) {
-
-        success = false;
+    function addToHouse(uint256 houseId, address deviceAddr) isRegistered(deviceAddr) {
         
         var (,,host,,,,,) = houses.getHouseInfo(houseId);
 
-        // verify caller is the host of the house
+        // Verify if caller is the host of the house.
         require(msg.sender == host);
 
         devices[deviceAddr].houseId = houseId; 
         devicesOf[houseId].push(deviceAddr);
-
-        success = true; 
-
     }
 
 

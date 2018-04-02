@@ -60,7 +60,7 @@ module.exports = async function(deployer) {
         OkeyDokeyInst.updateAddress(3, ReservationsInst.address),
         OkeyDokeyInst.updateAddress(4, ReviewsInst.address),
         HousesInst.initializeContracts(OkeyDokeyInst.address),
-        // DevicesInst.initializeContracts(OkeyDokeyInst.address),
+        DevicesInst.initializeContracts(OkeyDokeyInst.address),
         ReservationsInst.initializeContracts(OkeyDokeyInst.address),
         // ReviewsInst.initializeContracts(OkeyDokeyInst.address)
     ]).catch(error => {
@@ -70,7 +70,7 @@ module.exports = async function(deployer) {
 
     // Check initialization.
     const godOkdk = await OkeyDokeyGodInst.getAddress().catch(error => {console.log(error);});
-    const okdkToken = await OkeyDokeyGodInst.getAddress(0).catch(error => {console.log(error);});
+    const okdkToken = await OkeyDokeyInst.getAddress(0).catch(error => {console.log(error);});
     const okdkHouses = await OkeyDokeyInst.getAddress(1).catch(error => {console.log(error);});
     const okdkDevices = await OkeyDokeyInst.getAddress(2).catch(error => {console.log(error);});
     const okdkReservations = await OkeyDokeyInst.getAddress(3).catch(error => {console.log(error);});

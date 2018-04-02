@@ -3,10 +3,10 @@ pkill -f ganache-cli
 
 # Launch vm in a new window.
 if [[ "$OSTYPE" == "linux-gnu" ]]; then
-        x-terminal-emulator -e "ganache-cli --account='0x3656e131f04ddb9eaf206b2859f423c8260bdff9d7b1a071b06d405f50ed3fa0,100000000000000000000'" &
+        x-terminal-emulator -e "ganache-cli --account='0x3656e131f04ddb9eaf206b2859f423c8260bdff9d7b1a071b06d405f50ed3fa0,100000000000000000000' --account='0xfd4c79eee4e36d966b38a6617f60e3bdebec184e640d1d11348ba838c9129c48,100000000000000000000'" &
 
 elif [[ "$OSTYPE" == "darwin"* ]]; then
-        osascript -e 'tell application "Terminal" to do script "ganache-cli --account='0x3656e131f04ddb9eaf206b2859f423c8260bdff9d7b1a071b06d405f50ed3fa0,100000000000000000000'"' &
+        osascript -e 'tell application "Terminal" to do script "ganache-cli --account='0x3656e131f04ddb9eaf206b2859f423c8260bdff9d7b1a071b06d405f50ed3fa0,100000000000000000000' --account='0xfd4c79eee4e36d966b38a6617f60e3bdebec184e640d1d11348ba838c9129c48,100000000000000000000'"' &
 
 # elif [[ "$OSTYPE" == "cygwin" ]]; then
 

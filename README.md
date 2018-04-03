@@ -1,9 +1,9 @@
 # OkeyDokey
-"Opening doors to ubiquitous asset utilization."
+"Opening doors to smart asset utilization."​
 
-OkeyDokey is blockchain and IoT based access control system that integrates digital payment transactions with access to physical objects/assets.
+OkeyDokey is blockchain and IoT based access control system that integrates digital payment transactions with access to physical doors. 
 
-OkeyDokey’s vision is to drive productivity in cities by providing easy accessibility and cost effective way for people to utilize idling assets. Our mission is to provide a system where blockchain based digital payment transaction is integrated with smart connected door locks, automatically granting access to accommodations, offices and storage spaces to those who’ve paid and been verified by the blockchain network. OkeyDokey reduces the complexities and operational cost in receiving and managing bookings, payments, and opening doors to the right guest at the right time.
+OkeyDokey’s vision is to drive productivity in cities by providing easy accessibility and cost effective way for people to utilize idling assets. Our mission is to provide blockchain based digital payment transaction integrated smart connected door lock system, which automatically grants access to accommodations, offices and storage spaces to those who’ve paid and been verified by the blockchain network. OkeyDokey drives productivity by relieving the complexities and costs involved in both digital and physical operations of sharing economy.
 
 <p align="center">
   <img align="center" src="img/logo.png" width="532" height="184" alt="logo.png"/>

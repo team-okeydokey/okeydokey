@@ -20,7 +20,7 @@ module.exports = async function(deployer) {
     await Promise.all([
         deployer.deploy(OkeyDokeyGod),
         deployer.deploy(OkeyDokey),
-        deployer.deploy(Token, 1000000000, "OkeyDokeyToken", "ODK"),
+        deployer.deploy(Token, 1000000000, "OkeyToken", "OKEY"),
         deployer.deploy(Houses),
         deployer.deploy(Devices),
         deployer.deploy(Reservations),

@@ -1,7 +1,9 @@
+// This library was provided by OpenZepplin.
+
 pragma solidity ^0.4.19;
 
 import "../libs/SafeMath.sol";
-import "../token/KeyToken.sol";
+import "../token/OkeyToken.sol";
 
 /**
  * @title Crowdsale
@@ -20,7 +22,7 @@ contract Crowdsale {
   using SafeMath for uint256;
 
   // The token being sold
-  KeyToken public token;
+  OkeyToken public token;
 
   // Address where funds are collected
   address public wallet;
@@ -45,7 +47,7 @@ contract Crowdsale {
    * @param _wallet Address where collected funds will be forwarded to
    * @param _token Address of the token being sold
    */
-  function Crowdsale(uint256 _rate, address _wallet, KeyToken _token) public {
+  function Crowdsale(uint256 _rate, address _wallet, OkeyToken _token) public {
     require(_rate > 0);
     require(_wallet != address(0));
     require(_token != address(0));
@@ -128,7 +130,7 @@ contract Crowdsale {
    * @param _tokenAmount Number of tokens to be purchased
    */
   function _processPurchase(address _beneficiary, uint256 _tokenAmount) internal {
-    _deliverTokens(_beneficiary, _tokenAmount);
+    
   }
 
   /**

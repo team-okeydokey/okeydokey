@@ -1,7 +1,7 @@
 pragma solidity ^0.4.19;
 
 import "../core/OkeyDokey.sol";
-import "../token/KeyToken.sol";
+import "../token/OkeyToken.sol";
 import "./Houses.sol";
 
 contract Reservations is tokenRecipient {
@@ -34,7 +34,7 @@ contract Reservations is tokenRecipient {
     address private tokenAddress;
 
     /** Instance of Key Token contract. */
-    KeyToken private token;
+    OkeyToken private token;
 
     /** Address of Houses contract. */
     address private housesAddress;
@@ -146,7 +146,7 @@ contract Reservations is tokenRecipient {
         okeyDokey = OkeyDokey(okeyDokeyAddress);
 
         tokenAddress = okeyDokey.getAddress(0);
-        token = KeyToken(tokenAddress);
+        token = OkeyToken(tokenAddress);
 
         housesAddress = okeyDokey.getAddress(1);
         houses = Houses(housesAddress);

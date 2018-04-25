@@ -33,7 +33,7 @@ npm install -g ganache-cli
 To build and deploy on local ganache test network:
 ```bash
 chmod +x ./build.sh
-./build.sh
+./build.sh local
 ```
 
 If you encounter `The contract code couldn't be stored, please check your gas amount`, just run `./build.sh` again. This error occurs because we can't deploy abstract contracts.

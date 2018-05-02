@@ -5,15 +5,16 @@ pragma solidity ^0.4.19;
 /// @dev Models a uint -> uint mapping where it is possible to iterate over all keys.
 library IterableMapping
 {
+
   struct itmap
   {
-    mapping(address => IndexValue) data;
+    mapping(bytes32 => IndexValue) data;
     KeyFlag[] keys;
     uint size;
   }
-  struct IndexValue { uint keyIndex; bool value; }
-  struct KeyFlag { address key; bool deleted; }
-  function insert(itmap storage self, address key, bool value) public returns (bool replaced)
+  struct IndexValue { uint keyIndex; address[5] value; }
+  struct KeyFlag { bytes32 key; bool deleted; }
+  function insert(itmap storage self, bytes32 key, address[5] value) public returns (bool replaced)
   {
     uint keyIndex = self.data[key].keyIndex;
     self.data[key].value = value;
@@ -28,7 +29,7 @@ library IterableMapping
       return false;
     }
   }
-  function remove(itmap storage self, address key) public returns (bool success)
+  function remove(itmap storage self, bytes32 key) public returns (bool success)
   {
     uint keyIndex = self.data[key].keyIndex;
     if (keyIndex == 0)
@@ -37,7 +38,7 @@ library IterableMapping
     self.keys[keyIndex - 1].deleted = true;
     self.size --;
   }
-  function contains(itmap storage self, address key) public returns (bool)
+  function contains(itmap storage self, bytes32 key) public returns (bool)
   {
     return self.data[key].keyIndex > 0;
   }
@@ -56,7 +57,7 @@ library IterableMapping
       keyIndex++;
     return keyIndex;
   }
-  function iterate_get(itmap storage self, uint keyIndex) public returns (address key, bool value)
+  function iterate_get(itmap storage self, uint keyIndex) public returns (bytes32 key, address[5] value)
   {
     key = self.keys[keyIndex].key;
     value = self.data[key].value;

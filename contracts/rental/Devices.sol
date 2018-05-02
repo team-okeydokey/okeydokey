@@ -186,7 +186,8 @@ contract Devices {
      * @param houseId Id of the house to add this device. 
      * @param deviceAddr The address of the device. 
      */
-    function addToHouse(uint256 houseId, address deviceAddr) isRegistered(deviceAddr) {
+    function addToHouse(uint256 houseId, address deviceAddr) 
+        isRegistered(deviceAddr) public {
         
         var (,,host,,,,,) = houses.getHouseInfo(houseId);
 

@@ -20,17 +20,20 @@ contract OkeyDokeySale is Crowdsale {
     /* Whitelist with all users that can contribute to this ico. */
     IterableMapping.itmap public whitelist;
 
-    /* Amount of wei contributed. */
-    mapping (address => uint256) public contributionOf;
+    /* Address to its user id. */
+    mapping (address => bytes32) private idOf; 
 
-    /* Amount of tokens rewarded. */
-    mapping (address => uint256) public tokensOf;
+    /* User id to amount of wei contributed. */
+    mapping (bytes32 => uint256) public contributionOf;
 
-    /* Amount of referral bonus rewarded. */
-    mapping (address => uint256) public bonusTokensOf;
+    /* User id to amount of tokens rewarded. */
+    mapping (bytes32 => uint256) public tokensOf;
 
-    /* Address that provided the referral link for an address. */
-    mapping (address => address) public referrerOf;
+    /* User id to amount of referral bonus rewarded. */
+    mapping (bytes32 => uint256) public bonusTokensOf;
+
+    /* User id to address that provided the referral link for an address. */
+    mapping (bytes32 => bytes32) public referrerOf;
 
     uint256 public tokensSold;
     uint256 public tokenCap;
@@ -60,8 +63,9 @@ contract OkeyDokeySale is Crowdsale {
      * @dev Reverts if not in crowdsale time range.  
      */
     modifier onlyAdmin() {
+        require(owner != address(0));
         require(admin != address(0));
-        require(msg.sender == admin);
+        require(msg.sender == admin || msg.sender == owner);
         _;
     }
     
@@ -96,7 +100,7 @@ contract OkeyDokeySale is Crowdsale {
     /**
      * @dev Sets new admin. 
      */
-    function setAdmin(address _admin) onlyOwner {
+    function setAdmin(address _admin) onlyOwner public {
       require(_admin != address(0));
 
       admin = _admin;
@@ -125,10 +129,11 @@ contract OkeyDokeySale is Crowdsale {
      */
     function _preValidatePurchase(address _beneficiary, uint256 _weiAmount) 
       internal onlyWhileOpen {
-        super._preValidatePurchase(_beneficiary, _weiAmount);
-        
-        require(whitelist.data[_beneficiary].value);
-        require(tokensSold.add(_getTokenAmount(_weiAmount)) <= tokenCap);
+
+      require(_addressInWhitelist(_beneficiary));
+      require(tokensSold.add(_getTokenAmount(_weiAmount)) <= tokenCap);
+
+      super._preValidatePurchase(_beneficiary, _weiAmount);
     }
 
     /**
@@ -148,35 +153,25 @@ contract OkeyDokeySale is Crowdsale {
      */
     function _updateTokenBalanceState(address _beneficiary, uint256 _weiAmount) internal {
 
+      // Fetch id.
+      bytes32 id = idOf[_beneficiary];
+
       // Calculate and add token balance.
-      uint256 initialTokens = tokensOf[_beneficiary];
       uint256 newTokens = _getTokenAmount(_weiAmount);
-      tokensOf[_beneficiary] = initialTokens.add(newTokens);
+      tokensOf[id] = tokensOf[id].add(newTokens);
 
-     // Calculate and award referral bonus, if applicable.
-     bool hasReferrer;
-     address referrer;
-     (hasReferrer, referrer) = _hasReferrer(_beneficiary);
-     if (hasReferrer) {
-        // Update token buyer's bonus tokens.
-        uint256 initialBonus = bonusTokensOf[_beneficiary];
-        uint256 newBonusTokens = _weiAmount.mul(bonusRate);
+      // Calculate and award referral bonus, if applicable.
+      bool hasReferrer;
+      bytes32 referrer;
+      (hasReferrer, referrer) = _hasReferrer(id);
+      if (hasReferrer) {
 
-        if (initialBonus.add(newBonusTokens) >= bonusCap) {
-          bonusTokensOf[_beneficiary] = bonusCap;
-        } else {
-          bonusTokensOf[_beneficiary] = bonusTokensOf[_beneficiary].add(newBonusTokens);
-        }
+        // Calculate bonus tokens.
+        uint256 newBonusTokens = _getBonusTokenAmount(_weiAmount);
 
-        // Update referrer's bonus tokens.
-        uint256 initialBonusR = bonusTokensOf[referrer];
-        uint256 newBonusTokensR = _weiAmount.mul(bonusRate);
-
-        if (initialBonusR.add(newBonusTokensR) >= bonusCap) {
-          bonusTokensOf[referrer] = bonusCap;
-        } else {
-          bonusTokensOf[referrer] = bonusTokensOf[referrer].add(newBonusTokensR);
-        }
+        // Update token buyer's and referrer's bonus tokens.
+        bonusTokensOf[id] = bonusTokensOf[id].add(newBonusTokens);
+        bonusTokensOf[id] = bonusTokensOf[id].add(newBonusTokens);
       }
 
     }
@@ -188,96 +183,197 @@ contract OkeyDokeySale is Crowdsale {
      */
     function _updateContributionState(address _beneficiary, uint256 _weiAmount) internal {
       // Prevent overflow.      
-      contributionOf[_beneficiary] = contributionOf[_beneficiary].add(_weiAmount);
+      bytes32 id = idOf[_beneficiary];
+      contributionOf[id] = contributionOf[id].add(_weiAmount);
     }
 
     /**
      * @dev Calculate bonus token amount.
-     * @param _beneficiary Address receiving the tokens
      * @param _weiAmount Value in wei involved in the purchase
      */
-    function _getBonusTokenAmount(address _beneficiary, uint256 _weiAmount) 
+    function _getBonusTokenAmount(uint256 _weiAmount) 
       internal view returns (uint256) {
-
-      require(_beneficiary != address(0));
-      require(referrerOf[_beneficiary] != address(0));
 
       return _weiAmount.mul(bonusRate);
     }
 
     /**
-     * @dev Add user to whitelist.
-     * @param _user Address of user to whitelist.
+     * @dev Recover funds in an emergency.
      */
-    function whitelistAddress(address _user) public onlyAdmin {
-      require(_user != address(0));
-
-      IterableMapping.insert(whitelist, _user, true);
-    }
-
-    /**
-     * @dev Remove user from whitelist.
-     * @param _user Address of user to whitelist.
-     */
-    function unWhitelistAddress(address _user) public onlyAdmin {
-      require(_user != address(0));
-
-     IterableMapping.insert(whitelist, _user, false);
+    function recoverFunds() onlyOwner public {
+        _deliverTokens(owner, token.balanceOf(address(this))); 
     }
 
     /**
      * @dev Release tokens. Must be called by the address that received ether.
+     * @param _start Starting index of registered user, inclusive.
+     * @param _end Final index of registered user, inclusive.
      */
-    function releaseTokens() public {
+    // function batchReleaseTokens(uint _start, uint _end) public onlyAdmin {
+    //   require(start <= end);
+    //   require(IterableMapping.iterate_valid(whitelist, start));
+    //   require(IterableMapping.iterate_valid(whitelist, end));
+    //   require(IterableMapping.iterate_start(whitelist) <= start);
 
-      require(msg.sender == wallet);
+    //   for (uint i = start; i <= end; i = IterableMapping.iterate_next(whitelist, i)) {
 
-      for (uint256 i = IterableMapping.iterate_start(whitelist); 
-        IterableMapping.iterate_valid(whitelist, i); 
-        i = IterableMapping.iterate_next(whitelist, i)) {
+    //     // Extract each id.
+    //     bytes32 id;
+    //     (id, ) = IterableMapping.iterate_get(whitelist, i);
 
-        address beneficiary;
-        (beneficiary, ) = IterableMapping.iterate_get(whitelist, i);
+    //     // Calculate and transfer tokens.
+    //     uint256 tokens = tokensOf[id].add(bonusTokensOf[id]);
+    //     _deliverTokens(id, tokens);
+    //   }
+    // }
 
-        uint256 tokens = tokensOf[beneficiary].add(bonusTokensOf[beneficiary]);
-        _deliverTokens(beneficiary, tokens);
-      }
+    /**
+     * @dev Deliver tokens to an individual user.
+     * @param _id Id of the user.
+     * @param _address Address to deliver tokens to.
+     */
+    function releaseTokens(bytes32 _id, address _address) public onlyAdmin {
+      require(_idInWhitelist(_id));
+      require(idOf[_address] == _id);
+
+      _deliverTokens(_address, contributionOf[_id]);
     }
+
+    /* Referral functions */
 
     /**
      * @dev Add a referrer of an address.
-     * @param _referrer Provider of referral link
-     * @param _referee Person who clicked the link
+     * @param _referee Id of person who clicked the link
+     * @param _referrer Id of provider of referral link
      */
-    function addReferrer(address _referrer, address _referee) 
+    function addReferrer(bytes32 _referee, bytes32 _referrer) 
       onlyAdmin public {
-      require(_referrer != address(0));
-      require(_referee != address(0));
-
-      require(whitelist.data[_referrer].value);
-      require(whitelist.data[_referee].value);
+      require(_referee != 0x0);
+      require(_referrer != 0x0);
+     
+      require(_idInWhitelist(_referee));
+      require(_idInWhitelist(_referrer));
 
       referrerOf[_referee] = _referrer;
     }
 
     /**
      * @dev Check if a sale is eligible for referral bonus.
-     * @param _beneficiary Address that sent ether
+     * @param _id Id that sent ether
      * @return _eligible True if eligible
-     * @return _referrer Address of referrer
+     * @return _referrer Id of referrer
      */
-    function _hasReferrer(address _beneficiary) 
-      internal returns (bool _eligible, address _referrer) {
+    function _hasReferrer(bytes32 _id) 
+      internal view returns (bool _eligible, bytes32 _referrer) {
 
-      require(_beneficiary != address(0));
+      require(_id != 0x0);
 
       _eligible = false;
-      _referrer = referrerOf[_beneficiary];
+      _referrer = referrerOf[_id];
 
-      if (_referrer != address(0)) {
+      if (_referrer != 0x0) {
         _eligible = true;
       }
-
     }
 
+    /* Whitelist functions */
+
+    /**
+     * @dev Add user to whitelist
+     * @param _id Id of user to whitelist
+     * @param _address Address of user to whitelist
+     * @param _index Index, from 0 to 4, indicating which address to modify.
+     */
+    function whitelistAddress(bytes32 _id, address _address,uint8 _index) 
+      public onlyAdmin {
+      _whitelistAddress(_id, _address, _index);
+    }
+
+    /**
+     * @dev Remove user from whitelist
+     * @param _id User id to whitelist
+     * @param _address Address of user to whitelist
+     * @param _index Index, from 0 to 4, indicating which address to modify.
+     */
+    function _whitelistAddress(bytes32 _id, address _address, uint8 _index) 
+      internal {
+
+      require(_id != 0x0);
+      require(_address != address(0));
+      require(0 <= _index && _index < 5);
+      require(!_addressInWhitelist(_address));
+
+      // Fetch old entry.
+      if (_idInWhitelist(_id)) {
+
+        address[5] storage addresses = whitelist.data[_id].value;
+        assert(0 < addresses.length && addresses.length < 5);
+
+        // Update address list.
+        addresses[_index] = _address;
+        
+      // Create new entry.
+      } else {
+        address[5] memory newAddresses;
+        // newAddresses[0] = __addressid;
+        newAddresses[_index] = _address;
+        IterableMapping.insert(whitelist, _id, newAddresses);
+      }
+
+      // Map address to its id.
+      idOf[_address] = _id;
+    }
+
+    /**
+     * @dev Get addresses listed under id
+     * @param _id Id to fetch addresses for
+     * @return Addresses (max of 5).
+     */
+    function getAddressesOf(bytes32 _id) onlyAdmin 
+      public returns (address[5]) {
+
+      require(_idInWhitelist(_id));
+
+
+      return whitelist.data[_id].value;
+    }
+
+    /**
+     * @dev Check if an address is in whitelist
+     * @param _address Address to check for
+     * @return True if in whitelist
+     */
+    function _addressInWhitelist(address _address) 
+      internal view returns (bool) {
+
+      require(_address != address(0));
+
+      bytes32 id = idOf[_address]; 
+
+      if (id.length != 0x0) {
+
+        address[5] memory addresses = getAddressesOf(id);
+
+        for (uint i=0; i < addresses.length; i ++) {
+          if (addresses[i] == _address) {
+            return true;
+          }
+        }
+      } 
+
+      return false;
+    }
+
+    /**
+     * @dev Check if a user id is in whitelist
+     * @param _id Id to check for.
+     * @return True if in whitelist
+     */
+    function _idInWhitelist(bytes32 _id) 
+      internal view returns (bool) {
+
+      require(_id != 0x0);
+
+      return IterableMapping.contains(whitelist, _id);
+    }
 }

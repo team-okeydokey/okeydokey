@@ -35,6 +35,11 @@ build_contracts() {
 	   rm -r ../okdkjs/lib/contracts/
 	fi
 	mkdir ../okdkjs/lib/contracts/
+
+	if [ -d "../okdkjs-ico/assets/contracts/" ]; then
+	   rm -r ../okdkjs-ico/assets/contracts/
+	fi
+	mkdir ../okdkjs-ico/assets/contracts/
 }
 
 truffle_migrate() {
@@ -46,6 +51,7 @@ copy_files() {
 	# Copy json abi files to okdkjs.
 	# find ./build/contracts/ ! -name Migrations.json -exec cp -t ../okdkjs/lib/contracts/ {} +
 	rsync -r --exclude='Migrations.json' --exclude='Test.json' ./build/contracts/ ../okdkjs/lib/contracts/
+	rsync -r --exclude='Migrations.json' --exclude='Test.json' ./build/contracts/ ../okdkjs-ico/assets/contracts/
 }
 
 if [[ $1 == "local" ]]; then

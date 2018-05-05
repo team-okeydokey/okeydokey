@@ -5,11 +5,12 @@ import "../libs/IterableMapping.sol";
 import "./Crowdsale.sol";
 
 /**
- * @title TimedCrowdsale
- * @dev Crowdsale accepting contributions only within a time frame.
+ * @title OkeyDokeySale
+ * @dev Crowdsale accepting contributions only within a time frame and under a cap.
  */
 contract OkeyDokeySale is Crowdsale {
     using SafeMath for uint256; 
+    using IterableMapping for IterableMapping.itmap;
 
     /* Creator of this ICO contract. */
     address owner;
@@ -37,7 +38,6 @@ contract OkeyDokeySale is Crowdsale {
 
     uint256 public tokensSold;
     uint256 public tokenCap;
-    uint256 public bonusCap;
     uint256 public bonusRate;
     uint256 public openingTime;
     uint256 public closingTime;
@@ -47,6 +47,7 @@ contract OkeyDokeySale is Crowdsale {
      */
     modifier onlyWhileOpen {
         require(openingTime <= now && now <= closingTime);
+        require(tokensSold <= tokenCap);
         _;
     }
 
@@ -72,17 +73,17 @@ contract OkeyDokeySale is Crowdsale {
     /**
      * @dev Constructor, takes all necessary arguments.
      * @param _rate Number of token units a buyer gets per wei
-     * @param _admin Address that can whitelist addresses. 
+     * @param _bonusRate Number of token units a awarded as referral bonus per wei
+     * @param _admin Address that can whitelist addresses
      * @param _wallet Address where collected funds will be forwarded to
      * @param _token Address of the token being sold
      * @param _tokenCap Max amount of tokens to sell
-     * @param _bonusCap Max amount of referral bonus to award to an individual
-     * @param _bonusRate Number of token units a awarded as referral bonus per wei
      * @param _openingTime Crowdsale opening time
      * @param _closingTime Crowdsale closing time
      */
-    function OkeyDokeySale(uint256 _rate, address _admin, address _wallet, OkeyToken _token, 
-                           uint256 _tokenCap, uint256 _bonusCap, uint256 _bonusRate,
+    function OkeyDokeySale(uint256 _rate, uint256 _bonusRate, 
+                           address _admin, address _wallet, 
+                           OkeyToken _token, uint256 _tokenCap,
                            uint256 _openingTime, uint256 _closingTime) 
                            Crowdsale(_rate, _wallet, _token) public {
         require(_tokenCap > 0);
@@ -91,7 +92,6 @@ contract OkeyDokeySale is Crowdsale {
         owner = msg.sender;
         admin = _admin;
         tokenCap = _tokenCap;
-        bonusCap = _bonusCap;
         bonusRate = _bonusRate;
         openingTime = _openingTime;
         closingTime = _closingTime;
@@ -131,7 +131,8 @@ contract OkeyDokeySale is Crowdsale {
       internal onlyWhileOpen {
 
       require(_addressInWhitelist(_beneficiary));
-      require(tokensSold.add(_getTokenAmount(_weiAmount)) <= tokenCap);
+      // Allow last purchase that overshoots sale goal.
+      require(tokensSold <= tokenCap);
 
       super._preValidatePurchase(_beneficiary, _weiAmount);
     }
@@ -284,8 +285,9 @@ contract OkeyDokeySale is Crowdsale {
      * @param _address Address of user to whitelist
      * @param _index Index, from 0 to 4, indicating which address to modify.
      */
-    function whitelistAddress(bytes32 _id, address _address,uint8 _index) 
+    function whitelistAddress(bytes32 _id, address _address, uint8 _index) 
       public onlyAdmin {
+
       _whitelistAddress(_id, _address, _index);
     }
 
@@ -307,7 +309,6 @@ contract OkeyDokeySale is Crowdsale {
       if (_idInWhitelist(_id)) {
 
         address[5] storage addresses = whitelist.data[_id].value;
-        assert(0 < addresses.length && addresses.length < 5);
 
         // Update address list.
         addresses[_index] = _address;
@@ -330,10 +331,9 @@ contract OkeyDokeySale is Crowdsale {
      * @return Addresses (max of 5).
      */
     function getAddressesOf(bytes32 _id) onlyAdmin 
-      public returns (address[5]) {
+      public view returns (address[5]) {
 
       require(_idInWhitelist(_id));
-
 
       return whitelist.data[_id].value;
     }
@@ -350,7 +350,7 @@ contract OkeyDokeySale is Crowdsale {
 
       bytes32 id = idOf[_address]; 
 
-      if (id.length != 0x0) {
+      if (id != 0x0) {
 
         address[5] memory addresses = getAddressesOf(id);
 
@@ -372,7 +372,9 @@ contract OkeyDokeySale is Crowdsale {
     function _idInWhitelist(bytes32 _id) 
       internal view returns (bool) {
 
-      require(_id != 0x0);
+      if (_id == 0x0) {
+        return false;
+      }
 
       return IterableMapping.contains(whitelist, _id);
     }

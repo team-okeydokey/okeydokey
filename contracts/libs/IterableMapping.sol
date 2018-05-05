@@ -38,26 +38,26 @@ library IterableMapping
     self.keys[keyIndex - 1].deleted = true;
     self.size --;
   }
-  function contains(itmap storage self, bytes32 key) public returns (bool)
+  function contains(itmap storage self, bytes32 key) public view returns (bool)
   {
     return self.data[key].keyIndex > 0;
   }
-  function iterate_start(itmap storage self) public returns (uint keyIndex)
+  function iterate_start(itmap storage self) public view returns (uint keyIndex)
   {
     return iterate_next(self, uint(-1));
   }
-  function iterate_valid(itmap storage self, uint keyIndex) public returns (bool)
+  function iterate_valid(itmap storage self, uint keyIndex) public view returns (bool)
   {
     return keyIndex < self.keys.length;
   }
-  function iterate_next(itmap storage self, uint keyIndex) public returns (uint r_keyIndex)
+  function iterate_next(itmap storage self, uint keyIndex) public view returns (uint r_keyIndex)
   {
     keyIndex++;
     while (keyIndex < self.keys.length && self.keys[keyIndex].deleted)
       keyIndex++;
     return keyIndex;
   }
-  function iterate_get(itmap storage self, uint keyIndex) public returns (bytes32 key, address[5] value)
+  function iterate_get(itmap storage self, uint keyIndex) public view returns (bytes32 key, address[5] value)
   {
     key = self.keys[keyIndex].key;
     value = self.data[key].value;

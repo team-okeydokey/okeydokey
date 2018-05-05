@@ -10,9 +10,9 @@ launch_gananche() {
 	sleep 1
 }
 
-build_contracts() {
+create_environment() {
 
-	echo -n "* Compiling contracts.. "
+	echo -n "* Creating build environment.. "
 
 	# Delete build folder.
 	if [ -d "./build/" ]; then
@@ -54,13 +54,13 @@ copy_files() {
 }
 
 if [[ $1 == "local" ]]; then
-	build_contracts
+	create_environment
 	launch_gananche
 	truffle_migrate development
 	copy_files
 
 elif [[ $1 == "ropsten" ]]; then
-	build_contracts
+	create_environment
 	truffle_migrate ropsten
 	copy_files
 

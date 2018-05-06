@@ -107,22 +107,6 @@ contract OkeyDokeySale is Crowdsale {
     }
 
     /**
-     * @dev Checks whether the cap has been reached. 
-     * @return Whether the cap was reached
-     */
-    function capReached() public view returns (bool) {
-        return tokensSold >= tokenCap;
-    }
-
-    /**
-     * @dev Checks whether the period in which the crowdsale is open has already elapsed.
-     * @return Whether crowdsale period has elapsed
-     */
-    function hasClosed() public view returns (bool) {
-        return now > closingTime;
-    }
-
-    /**
      * @dev Extend parent behavior requiring purchase to respect the funding cap.
      * @param _beneficiary Token purchaser
      * @param _weiAmount Amount of wei contributed
@@ -275,6 +259,32 @@ contract OkeyDokeySale is Crowdsale {
       if (_referrer != 0x0) {
         _eligible = true;
       }
+    }
+
+    /* Sale status functions */
+
+    /**
+     * @dev Checks whether the cap has been reached. 
+     * @return Whether the cap was reached
+     */
+    function capReached() public view returns (bool) {
+        return tokensSold >= tokenCap;
+    }
+
+    /**
+     * @dev Checks whether the period in which the crowdsale is open has already elapsed.
+     * @return Whether crowdsale period has elapsed
+     */
+    function hasClosed() public view returns (bool) {
+        return now > closingTime;
+    }
+
+    /**
+     * @dev Getter for whitelist size.
+     * @return Size of whitelist.
+     */
+    function getWhitelistSize() public view returns (uint) {
+      return whitelist.size;
     }
 
     /* Whitelist functions */

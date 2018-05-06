@@ -19,7 +19,7 @@ contract OkeyDokeySale is Crowdsale {
     address admin;
 
     /* Whitelist with all users that can contribute to this ico. */
-    IterableMapping.itmap public whitelist;
+    IterableMapping.itmap private whitelist;
 
     /* Address to its user id. */
     mapping (address => bytes32) private idOf; 
@@ -66,7 +66,7 @@ contract OkeyDokeySale is Crowdsale {
     modifier onlyAdmin() {
         require(owner != address(0));
         require(admin != address(0));
-        require(msg.sender == admin || msg.sender == owner);
+        require(msg.sender == owner || msg.sender == admin);
         _;
     }
     
@@ -190,29 +190,6 @@ contract OkeyDokeySale is Crowdsale {
     }
 
     /**
-     * @dev Release tokens. Must be called by the address that received ether.
-     * @param _start Starting index of registered user, inclusive.
-     * @param _end Final index of registered user, inclusive.
-     */
-    // function batchReleaseTokens(uint _start, uint _end) public onlyAdmin {
-    //   require(start <= end);
-    //   require(IterableMapping.iterate_valid(whitelist, start));
-    //   require(IterableMapping.iterate_valid(whitelist, end));
-    //   require(IterableMapping.iterate_start(whitelist) <= start);
-
-    //   for (uint i = start; i <= end; i = IterableMapping.iterate_next(whitelist, i)) {
-
-    //     // Extract each id.
-    //     bytes32 id;
-    //     (id, ) = IterableMapping.iterate_get(whitelist, i);
-
-    //     // Calculate and transfer tokens.
-    //     uint256 tokens = tokensOf[id].add(bonusTokensOf[id]);
-    //     _deliverTokens(id, tokens);
-    //   }
-    // }
-
-    /**
      * @dev Deliver tokens to an individual user.
      * @param _id Id of the user.
      * @param _address Address to deliver tokens to.
@@ -285,6 +262,29 @@ contract OkeyDokeySale is Crowdsale {
      */
     function getWhitelistSize() public view returns (uint) {
       return whitelist.size;
+    }
+
+    /**
+     * @dev Getter for user id in ith index.
+     * @param _index Index of user in  whitelist.
+     * @return bytes32 user id.
+     * @return Addresses associated with user id.
+     */
+    function getIdInIndex(uint _index) public view onlyAdmin 
+      returns (bytes32, address[5]) {
+
+      return IterableMapping.iterate_get(whitelist, _index);
+    }
+
+    /**
+     * @dev Checks whether id was registered to whitelist. 
+     * @param _id Id of user.
+     * @return Whether the id exists in whitelist.
+     */
+    function idInWhitelist(bytes32 _id) public view onlyAdmin 
+      returns (bool) {
+
+      return _idInWhitelist(_id);
     }
 
     /* Whitelist functions */

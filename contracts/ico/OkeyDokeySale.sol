@@ -48,7 +48,9 @@ contract OkeyDokeySale is Crowdsale {
      */
     modifier onlyWhileOpen {
         require(openingTime <= now && now <= closingTime);
-        require(tokensSold <= tokenCap);
+
+        // Allow last purchase that overshoots sale goal.
+        require(!capReached());
         _;
     }
 
@@ -119,9 +121,6 @@ contract OkeyDokeySale is Crowdsale {
 
       // Only allow contributions from whitelisted addresses.
       require(_addressInWhitelist(_beneficiary));
-
-      // Allow last purchase that overshoots sale goal.
-      require(!capReached());
     }
 
     /**
@@ -162,9 +161,9 @@ contract OkeyDokeySale is Crowdsale {
 
         // Update token buyer's and referrer's bonus tokens.
         bonusTokensOf[id] = bonusTokensOf[id].add(newBonusTokens);
-        bonusTokensOf[id] = bonusTokensOf[id].add(newBonusTokens);
+        bonusTokensOf[referrer] = bonusTokensOf[referrer].add(newBonusTokens);
 
-        bonusTokensSold = bonusTokensSold.add(newBonusTokens).add(newBonusTokens);
+        bonusTokensSold = bonusTokensSold.add(newBonusTokens.mul(2));
       }
 
     }
@@ -193,7 +192,7 @@ contract OkeyDokeySale is Crowdsale {
     /**
      * @dev Recover funds in an emergency.
      */
-    function recoverFunds() onlyOwner public {
+    function recoverFunds() onlyAdmin public {
         _deliverTokens(owner, token.balanceOf(address(this))); 
     }
 
@@ -206,7 +205,18 @@ contract OkeyDokeySale is Crowdsale {
       require(_idInWhitelist(_id));
       require(idOf[_address] == _id);
 
-      _deliverTokens(_address, contributionOf[_id]);
+      _deliverTokens(_address, tokensOf[_id].add(bonusTokensOf[_id]));
+    }
+
+     /**
+     * @dev Deliver tokens to an individual user.
+     * @param _id Id of the user
+     * @return Index of id within whitelist.
+     */
+    function indexOf(bytes32 _id) public onlyAdmin returns (uint) {
+      require(_idInWhitelist(_id));
+
+      return whitelist.data[_id].keyIndex;
     }
 
     /* Referral functions */
@@ -268,7 +278,7 @@ contract OkeyDokeySale is Crowdsale {
      * @dev Getter for whitelist size.
      * @return Size of whitelist.
      */
-    function getWhitelistSize() public view returns (uint) {
+    function whitelistSize() public view returns (uint) {
       return whitelist.size;
     }
 
@@ -278,7 +288,7 @@ contract OkeyDokeySale is Crowdsale {
      * @return bytes32 user id.
      * @return Addresses associated with user id.
      */
-    function getIdInIndex(uint _index) public view onlyAdmin 
+    function idInIndex(uint _index) public view onlyAdmin 
       returns (bytes32, address[5]) {
 
       return IterableMapping.iterate_get(whitelist, _index);
@@ -333,7 +343,17 @@ contract OkeyDokeySale is Crowdsale {
     }
 
     /**
-     * @dev Remove user from whitelist
+     * @dev Remove address from whitelist
+     * @param _address Address of user to unwhitelist
+     */
+    function unWhitelistAddress(address _address) 
+      public onlyAdmin {
+
+      _unWhitelistAddress(_address);
+    }
+
+    /**
+     * @dev Add user to whitelist
      * @param _id User id to whitelist
      * @param _address Address of user to whitelist
      * @param _index Index, from 0 to 4, indicating which address to modify.
@@ -351,8 +371,15 @@ contract OkeyDokeySale is Crowdsale {
 
         address[5] storage addresses = whitelist.data[_id].value;
 
+        address prevAddr = addresses[_index];
+
         // Update address list.
         addresses[_index] = _address;
+
+        // Remove previous address.
+        if (prevAddr != address(0)) {
+          idOf[prevAddr] = 0x0;
+        }
         
       // Create new entry.
       } else {
@@ -367,14 +394,38 @@ contract OkeyDokeySale is Crowdsale {
     }
 
     /**
+     * @dev Remove address from whitelist
+     * @param _address Address of user to unwhitelist
+     */
+    function _unWhitelistAddress(address _address) 
+      internal {
+
+      require(_address != address(0));
+      require(_addressInWhitelist(_address));
+
+      bytes32 id = idOf[_address];
+
+      address[5] storage addresses = whitelist.data[id].value;
+
+      for (uint i=0; i < addresses.length; i ++) {
+        if (addresses[i] == _address) {
+          addresses[i] = address(0);
+        }
+      }
+
+      // Map address to its id.
+      idOf[_address] = 0x0;
+    }
+
+    /**
      * @dev Get addresses listed under id
      * @param _id Id to fetch addresses for
      * @return Addresses (max of 5).
      */
-    function getAddressesOf(bytes32 _id) onlyAdmin 
+    function addressesOf(bytes32 _id) onlyAdmin 
       public view returns (address[5]) {
 
-      return _getAddressesOf(_id);
+      return _addressesOf(_id);
     }
 
     /**
@@ -391,7 +442,7 @@ contract OkeyDokeySale is Crowdsale {
 
       if (id != 0x0) {
 
-        address[5] memory addresses = _getAddressesOf(id);
+        address[5] memory addresses = _addressesOf(id);
 
         for (uint i=0; i < addresses.length; i ++) {
           if (addresses[i] == _address) {
@@ -423,7 +474,7 @@ contract OkeyDokeySale is Crowdsale {
      * @param _id Id to fetch addresses for
      * @return Addresses (max of 5).
      */
-    function _getAddressesOf(bytes32 _id) 
+    function _addressesOf(bytes32 _id) 
       internal view returns (address[5]) {
 
       require(_idInWhitelist(_id));

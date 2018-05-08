@@ -37,6 +37,7 @@ contract OkeyDokeySale is Crowdsale {
     mapping (bytes32 => bytes32) public referrerOf;
 
     uint256 public tokensSold;
+    uint256 public bonusTokensSold;
     uint256 public tokenCap;
     uint256 public bonusRate;
     uint256 public openingTime;
@@ -114,11 +115,13 @@ contract OkeyDokeySale is Crowdsale {
     function _preValidatePurchase(address _beneficiary, uint256 _weiAmount) 
       internal onlyWhileOpen {
 
-      require(_addressInWhitelist(_beneficiary));
-      // Allow last purchase that overshoots sale goal.
-      require(tokensSold <= tokenCap);
-
       super._preValidatePurchase(_beneficiary, _weiAmount);
+
+      // Only allow contributions from whitelisted addresses.
+      require(_addressInWhitelist(_beneficiary));
+
+      // Allow last purchase that overshoots sale goal.
+      require(!capReached());
     }
 
     /**
@@ -145,11 +148,14 @@ contract OkeyDokeySale is Crowdsale {
       uint256 newTokens = _getTokenAmount(_weiAmount);
       tokensOf[id] = tokensOf[id].add(newTokens);
 
+      tokensSold = tokensSold.add(newTokens);
+
       // Calculate and award referral bonus, if applicable.
-      bool hasReferrer;
+      bool eligible;
       bytes32 referrer;
-      (hasReferrer, referrer) = _hasReferrer(id);
-      if (hasReferrer) {
+      (eligible, referrer) = _hasReferrer(id);
+
+      if (eligible) {
 
         // Calculate bonus tokens.
         uint256 newBonusTokens = _getBonusTokenAmount(_weiAmount);
@@ -157,6 +163,8 @@ contract OkeyDokeySale is Crowdsale {
         // Update token buyer's and referrer's bonus tokens.
         bonusTokensOf[id] = bonusTokensOf[id].add(newBonusTokens);
         bonusTokensOf[id] = bonusTokensOf[id].add(newBonusTokens);
+
+        bonusTokensSold = bonusTokensSold.add(newBonusTokens).add(newBonusTokens);
       }
 
     }
@@ -245,7 +253,7 @@ contract OkeyDokeySale is Crowdsale {
      * @return Whether the cap was reached
      */
     function capReached() public view returns (bool) {
-        return tokensSold >= tokenCap;
+        return tokensSold.add(bonusTokensSold) >= tokenCap;
     }
 
     /**
@@ -285,6 +293,29 @@ contract OkeyDokeySale is Crowdsale {
       returns (bool) {
 
       return _idInWhitelist(_id);
+    }
+
+    /**
+     * @dev Checks whether address was registered to whitelist. 
+     * @param _address Address of user.
+     * @return Whether the address exists in whitelist.
+     */
+    function addressInWhitelist(address _address) public view onlyAdmin 
+      returns (bool) {
+
+      return _addressInWhitelist(_address);
+    }
+
+    /**
+     * @dev Checks whether an id has a referrer. 
+     * @param _id Id of user.
+     * @return Whether the id has a referrer.
+     * @return Id of the referrer.
+     */
+    function hasReferrer(bytes32 _id) public view onlyAdmin 
+      returns (bool, bytes32) {
+
+      return _hasReferrer(_id);
     }
 
     /* Whitelist functions */
@@ -343,9 +374,7 @@ contract OkeyDokeySale is Crowdsale {
     function getAddressesOf(bytes32 _id) onlyAdmin 
       public view returns (address[5]) {
 
-      require(_idInWhitelist(_id));
-
-      return whitelist.data[_id].value;
+      return _getAddressesOf(_id);
     }
 
     /**
@@ -362,7 +391,7 @@ contract OkeyDokeySale is Crowdsale {
 
       if (id != 0x0) {
 
-        address[5] memory addresses = getAddressesOf(id);
+        address[5] memory addresses = _getAddressesOf(id);
 
         for (uint i=0; i < addresses.length; i ++) {
           if (addresses[i] == _address) {
@@ -387,5 +416,18 @@ contract OkeyDokeySale is Crowdsale {
       }
 
       return IterableMapping.contains(whitelist, _id);
+    }
+
+    /**
+     * @dev Get addresses listed under id
+     * @param _id Id to fetch addresses for
+     * @return Addresses (max of 5).
+     */
+    function _getAddressesOf(bytes32 _id) 
+      internal view returns (address[5]) {
+
+      require(_idInWhitelist(_id));
+
+      return whitelist.data[_id].value;
     }
 }

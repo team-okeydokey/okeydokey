@@ -216,7 +216,7 @@ contract OkeyDokeySale is Crowdsale {
     function indexOf(bytes32 _id) public onlyAdmin returns (uint) {
       require(_idInWhitelist(_id));
 
-      return whitelist.data[_id].keyIndex;
+      return whitelist.data[_id].keyIndex - 1;
     }
 
     /* Referral functions */

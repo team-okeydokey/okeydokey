@@ -203,7 +203,7 @@ contract OkeyDokeySale is Crowdsale {
      */
     function releaseTokens(bytes32 _id, address _address) public onlyAdmin {
       require(_idInWhitelist(_id));
-      require(idOf[_address] == _id);
+      // require(idOf[_address] == _id);
 
       _deliverTokens(_address, tokensOf[_id].add(bonusTokensOf[_id]));
     }

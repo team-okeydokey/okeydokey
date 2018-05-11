@@ -39,6 +39,7 @@ contract OkeyDokeySale is Crowdsale {
     uint256 public tokensSold;
     uint256 public bonusTokensSold;
     uint256 public tokenCap;
+    uint256 public bonusCap;
     uint256 public bonusRate;
     uint256 public openingTime;
     uint256 public closingTime;
@@ -81,12 +82,13 @@ contract OkeyDokeySale is Crowdsale {
      * @param _wallet Address where collected funds will be forwarded to
      * @param _token Address of the token being sold
      * @param _tokenCap Max amount of tokens to sell
+     * @param _bonusCap Max amount of tokens a referrer can receive as bonus
      * @param _openingTime Crowdsale opening time
      * @param _closingTime Crowdsale closing time
      */
     function OkeyDokeySale(uint256 _rate, uint256 _bonusRate, 
                            address _admin, address _wallet, 
-                           OkeyToken _token, uint256 _tokenCap,
+                           OkeyToken _token, uint256 _tokenCap, uint256 _bonusCap,
                            uint256 _openingTime, uint256 _closingTime) 
                            Crowdsale(_rate, _wallet, _token) public {
         require(_tokenCap > 0);
@@ -95,6 +97,7 @@ contract OkeyDokeySale is Crowdsale {
         owner = msg.sender;
         admin = _admin;
         tokenCap = _tokenCap;
+        bonusCap = _bonusCap;
         bonusRate = _bonusRate;
         openingTime = _openingTime;
         closingTime = _closingTime;
@@ -159,11 +162,23 @@ contract OkeyDokeySale is Crowdsale {
         // Calculate bonus tokens.
         uint256 newBonusTokens = _getBonusTokenAmount(_weiAmount);
 
-        // Update token buyer's and referrer's bonus tokens.
+        // Update token buyer's bonus tokens.
         bonusTokensOf[id] = bonusTokensOf[id].add(newBonusTokens);
-        bonusTokensOf[referrer] = bonusTokensOf[referrer].add(newBonusTokens);
+        bonusTokensSold = bonusTokensSold.add(newBonusTokens);
 
-        bonusTokensSold = bonusTokensSold.add(newBonusTokens.mul(2));
+        // Calculate referrer's bonus tokens.
+        uint256 referrerBonusTokens;
+        if (bonusTokensOf[referrer] >= bonusCap) {
+          referrerBonusTokens = 0;
+        } else if (bonusTokensOf[referrer].add(newBonusTokens) >= bonusCap) {
+          referrerBonusTokens = bonusCap.sub(bonusTokensOf[referrer]);
+        } else {
+          referrerBonusTokens = newBonusTokens;
+        }
+
+        // Update referrer's bonus tokens. 
+        bonusTokensOf[referrer] = bonusTokensOf[referrer].add(referrerBonusTokens);
+        bonusTokensSold = bonusTokensSold.add(referrerBonusTokens);
       }
 
     }

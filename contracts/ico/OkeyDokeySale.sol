@@ -223,8 +223,8 @@ contract OkeyDokeySale is Crowdsale {
       _deliverTokens(_address, tokensOf[_id].add(bonusTokensOf[_id]));
     }
 
-     /**
-     * @dev Deliver tokens to an individual user.
+    /**
+     * @dev Get index of id within whitelist.
      * @param _id Id of the user
      * @return Index of id within whitelist.
      */
@@ -358,6 +358,18 @@ contract OkeyDokeySale is Crowdsale {
     }
 
     /**
+     * @dev Add user to whitelist
+     * @param _ids Id of user to whitelist
+     * @param _addresses Address of user to whitelist
+     * @param _indices Index, from 0 to 4, indicating which address to modify.
+     */
+    function whitelistAddresses(bytes32[] _ids, address[] _addresses, uint8[] _indices) 
+      public onlyAdmin {
+
+      _whitelistAddresses(_ids, _addresses, _indices);
+    }
+
+    /**
      * @dev Remove address from whitelist
      * @param _address Address of user to unwhitelist
      */
@@ -409,6 +421,24 @@ contract OkeyDokeySale is Crowdsale {
     }
 
     /**
+     * @dev Add user to whitelist
+     * @param _ids User id to whitelist
+     * @param _addresses Address of user to whitelist
+     * @param _indices Index, from 0 to 4, indicating which address to modify.
+     */
+    function _whitelistAddresses(bytes32[] _ids, address[] _addresses, uint8[] _indices) 
+      internal {
+
+      require(_ids.length > 0);
+      require(_ids.length == _addresses.length && _addresses.length == _indices.length);
+
+      for (uint i=0; i < _ids.length; i++) {
+        _whitelistAddress(_ids[i], _addresses[i], _indices[i]);
+      }
+    }
+
+
+    /**
      * @dev Remove address from whitelist
      * @param _address Address of user to unwhitelist
      */
@@ -422,7 +452,7 @@ contract OkeyDokeySale is Crowdsale {
 
       address[5] storage addresses = whitelist.data[id].value;
 
-      for (uint i=0; i < addresses.length; i ++) {
+      for (uint i=0; i < addresses.length; i++) {
         if (addresses[i] == _address) {
           addresses[i] = address(0);
         }

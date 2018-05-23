@@ -16,7 +16,7 @@ contract Whitelist {
     IterableMapping.itmap private whitelist;
 
     /* Add list of contracts that can access this contract. */
-    mapping (address => bool) private approvedAddresses;
+    mapping (address => bool) private systemAccess;
 
     /* Address to its user id. */
     mapping (address => bytes32) private idOf;
@@ -34,9 +34,7 @@ contract Whitelist {
      * @dev Reverts if not in crowdsale time range.  
      */
     modifier system() {
-        require(owner != address(0));
-        require(msg.sender == owner
-          || approvedAddresses[msg.sender]);
+        require(systemAccess[msg.sender]);
         _;
     }
     
@@ -45,6 +43,7 @@ contract Whitelist {
      */
     function Whitelist() public {
         owner = msg.sender;
+        systemAccess[msg.sender] = true;
     }
 
     /**
@@ -52,14 +51,22 @@ contract Whitelist {
      * @param _address Address to set permissions to access whitelist
      * @param _hasAccess Whether the address has access
      */
-    function setApproval(address _address, bool _hasAccess) onlyOwner public {
-      approvedAddresses[_address] = _hasAccess;
+    function setSystemAccess(address _address, bool _hasAccess) onlyOwner public {
+      systemAccess[_address] = _hasAccess;
+    }
+
+    /**
+     * @dev Get access level of an address. 
+     * @return Whether address has access
+     */
+    function getSystemAccess(address _address) public view returns (bool) {
+      return systemAccess[_address];
     }
 
     /**
      * @dev Deliver tokens to an individual user.
      * @param _id Id of the user
-     * @return Index of id within whitelist.
+     * @return Index of id within whitelist
      */
     function indexOf(bytes32 _id) public view returns (uint) {
       require(_idInWhitelist(_id));
@@ -69,7 +76,7 @@ contract Whitelist {
 
     /**
      * @dev Getter for whitelist size.
-     * @return Size of whitelist.
+     * @return Size of whitelist
      */
     function whitelistSize() public view returns (uint) {
       return whitelist.size;
@@ -77,9 +84,9 @@ contract Whitelist {
 
     /**
      * @dev Getter for user id in ith index.
-     * @param _index Index of user in  whitelist.
-     * @return bytes32 user id.
-     * @return Addresses associated with user id.
+     * @param _index Index of user in  whitelist
+     * @return bytes32 user id
+     * @return Addresses associated with user id
      */
     function idInIndex(uint _index) public view 
       returns (bytes32, address[5]) {
@@ -89,8 +96,8 @@ contract Whitelist {
 
     /**
      * @dev Checks whether id was registered to whitelist. 
-     * @param _id Id of user.
-     * @return Whether the id exists in whitelist.
+     * @param _id Id of user
+     * @return Whether the id exists in whitelist
      */
     function idInWhitelist(bytes32 _id) public view 
       returns (bool) {
@@ -100,8 +107,8 @@ contract Whitelist {
 
     /**
      * @dev Checks whether address was registered to whitelist. 
-     * @param _address Address of user.
-     * @return Whether the address exists in whitelist.
+     * @param _address Address of user
+     * @return Whether the address exists in whitelist
      */
     function addressInWhitelist(address _address) public view 
       returns (bool) {
@@ -113,7 +120,7 @@ contract Whitelist {
      * @dev Add user to whitelist
      * @param _id Id of user to whitelist
      * @param _address Address of user to whitelist
-     * @param _index Index, from 0 to 4, indicating which address to modify.
+     * @param _index Index, from 0 to 4, indicating which address to modify
      */
     function whitelistAddress(bytes32 _id, address _address, uint _index) 
       public system {

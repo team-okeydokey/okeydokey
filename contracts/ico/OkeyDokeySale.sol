@@ -87,9 +87,8 @@ contract OkeyDokeySale is Crowdsale {
      */
     function OkeyDokeySale(uint256 _rate, uint256 _bonusRate, 
                            address _admin, address _wallet, 
-                           OkeyToken _token, 
-                           Whitelist _whitelist, Referral _referral, 
-                           uint256 _tokenCap, uint256 _bonusCap,
+                           Whitelist _whitelist, Referral _referral,
+                           OkeyToken _token, uint256 _tokenCap, uint256 _bonusCap,
                            uint256 _openingTime, uint256 _closingTime) 
                            Crowdsale(_rate, _wallet, _token) public {
         require(_tokenCap > 0);

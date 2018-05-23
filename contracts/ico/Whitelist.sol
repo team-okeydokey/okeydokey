@@ -12,11 +12,11 @@ contract Whitelist {
     /* Creator of this ICO contract. */
     address owner;
 
-    /* Admin of this ICO contract. */
-    address admin;
-
     /* Whitelist with all users that can contribute to this ico. */
     IterableMapping.itmap private whitelist;
+
+    /* Add list of contracts that can access this contract. */
+    mapping (address => bool) private approvedAddresses;
 
     /* Address to its user id. */
     mapping (address => bytes32) private idOf;
@@ -33,29 +33,27 @@ contract Whitelist {
     /**
      * @dev Reverts if not in crowdsale time range.  
      */
-    modifier onlyAdmin() {
+    modifier system() {
         require(owner != address(0));
-        require(admin != address(0));
-        require(msg.sender == owner || msg.sender == admin);
+        require(msg.sender == owner
+          || approvedAddresses[msg.sender]);
         _;
     }
     
     /**
      * @dev Constructor, takes all necessary arguments.
-     * @param _admin Address that can whitelist addresses
      */
-    function Whitelist(address _admin) public {
+    function Whitelist() public {
         owner = msg.sender;
-        admin = _admin;
     }
 
     /**
-     * @dev Sets new admin. 
+     * @dev Sets access level of an address. 
+     * @param _address Address to set permissions to access whitelist
+     * @param _hasAccess Whether the address has access
      */
-    function setAdmin(address _admin) onlyOwner public {
-      require(_admin != address(0));
-
-      admin = _admin;
+    function setApproval(address _address, bool _hasAccess) onlyOwner public {
+      approvedAddresses[_address] = _hasAccess;
     }
 
     /**
@@ -63,7 +61,7 @@ contract Whitelist {
      * @param _id Id of the user
      * @return Index of id within whitelist.
      */
-    function indexOf(bytes32 _id) public onlyAdmin returns (uint) {
+    function indexOf(bytes32 _id) public view returns (uint) {
       require(_idInWhitelist(_id));
 
       return whitelist.data[_id].keyIndex - 1;
@@ -83,7 +81,7 @@ contract Whitelist {
      * @return bytes32 user id.
      * @return Addresses associated with user id.
      */
-    function idInIndex(uint _index) public view onlyAdmin 
+    function idInIndex(uint _index) public view 
       returns (bytes32, address[5]) {
 
       return IterableMapping.iterate_get(whitelist, _index);
@@ -94,7 +92,7 @@ contract Whitelist {
      * @param _id Id of user.
      * @return Whether the id exists in whitelist.
      */
-    function idInWhitelist(bytes32 _id) public view onlyAdmin 
+    function idInWhitelist(bytes32 _id) public view 
       returns (bool) {
 
       return _idInWhitelist(_id);
@@ -105,7 +103,7 @@ contract Whitelist {
      * @param _address Address of user.
      * @return Whether the address exists in whitelist.
      */
-    function addressInWhitelist(address _address) public view onlyAdmin 
+    function addressInWhitelist(address _address) public view 
       returns (bool) {
 
       return _addressInWhitelist(_address);
@@ -118,7 +116,7 @@ contract Whitelist {
      * @param _index Index, from 0 to 4, indicating which address to modify.
      */
     function whitelistAddress(bytes32 _id, address _address, uint _index) 
-      public onlyAdmin {
+      public system {
 
       _whitelistAddress(_id, _address, _index);
     }
@@ -130,7 +128,7 @@ contract Whitelist {
      * @param _indices Index, from 0 to 4, indicating which address to modify.
      */
     function whitelistAddresses(bytes32[] _ids, address[] _addresses, uint[] _indices) 
-      public onlyAdmin {
+      public system {
 
       _whitelistAddresses(_ids, _addresses, _indices);
     }
@@ -140,7 +138,7 @@ contract Whitelist {
      * @param _address Address of user to unwhitelist
      */
     function unWhitelistAddress(address _address) 
-      public onlyAdmin {
+      public system {
 
       _unWhitelistAddress(_address);
     }
@@ -233,7 +231,7 @@ contract Whitelist {
      * @param _id Id to fetch addresses for
      * @return Addresses (max of 5).
      */
-    function addressesOf(bytes32 _id) onlyAdmin 
+    function addressesOf(bytes32 _id) system 
       public view returns (address[5]) {
 
       return _addressesOf(_id);

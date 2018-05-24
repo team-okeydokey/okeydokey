@@ -22,7 +22,7 @@ contract Whitelist {
     mapping (address => bytes32) private idOf;
 
     /**
-     * @dev Reverts if not in crowdsale time range.  
+     * @dev Reverts if not in owner status.    
      */
     modifier onlyOwner() {
         require(owner != address(0));
@@ -31,7 +31,7 @@ contract Whitelist {
     }
 
     /**
-     * @dev Reverts if not in crowdsale time range.  
+     * @dev Reverts if not in admin status.  
      */
     modifier system() {
         require(systemAccess[msg.sender]);
@@ -114,6 +114,19 @@ contract Whitelist {
       returns (bool) {
 
       return _addressInWhitelist(_address);
+    }
+
+    /**
+     * @dev Get id of address.
+     * @param _address Address to query id for
+     * @return Id corresponding to address
+     */
+    function getIdOf(address _address) 
+      public view returns (bytes32) {
+
+      require(_addressInWhitelist(_address));
+
+      return idOf[_address];
     }
 
     /**
@@ -208,7 +221,6 @@ contract Whitelist {
       }
     }
 
-
     /**
      * @dev Remove address from whitelist
      * @param _address Address of user to unwhitelist
@@ -238,7 +250,7 @@ contract Whitelist {
      * @param _id Id to fetch addresses for
      * @return Addresses (max of 5).
      */
-    function addressesOf(bytes32 _id) system 
+    function addressesOf(bytes32 _id) 
       public view returns (address[5]) {
 
       return _addressesOf(_id);
@@ -297,4 +309,5 @@ contract Whitelist {
 
       return whitelist.data[_id].value;
     }
+
 }

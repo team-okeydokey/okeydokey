@@ -23,7 +23,7 @@ contract Referral {
 		Whitelist private whitelist;
 
 		/**
-		 * @dev Reverts if not in crowdsale time range.  
+		 * @dev Reverts if not in owner status.   
 		 */
 		modifier onlyOwner() {
 			require(owner != address(0));
@@ -32,7 +32,7 @@ contract Referral {
 		}
 
 		/**
-		 * @dev Reverts if not in crowdsale time range.  
+		 * @dev Reverts if not in admin status.  
 		 */
 		modifier system() {
 			require(systemAccess[msg.sender]);

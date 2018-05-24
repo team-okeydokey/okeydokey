@@ -11,16 +11,12 @@ import "./Crowdsale.sol";
  */
 contract OkeyDokeySale is Crowdsale {
     using SafeMath for uint256; 
-    using IterableMapping for IterableMapping.itmap;
 
     /* Creator of this ICO contract. */
     address owner;
 
     /* Admin of this ICO contract. */
     address admin;
-
-    /* Address to its user id. */
-    mapping (address => bytes32) private idOf; 
 
     /* User id to amount of wei contributed. */
     mapping (bytes32 => uint256) public contributionOf;
@@ -53,7 +49,7 @@ contract OkeyDokeySale is Crowdsale {
     }
 
     /**
-     * @dev Reverts if not in crowdsale time range.  
+     * @dev Reverts if not in owner status.    
      */
     modifier onlyOwner() {
         require(owner != address(0));
@@ -62,7 +58,7 @@ contract OkeyDokeySale is Crowdsale {
     }
 
     /**
-     * @dev Reverts if not in crowdsale time range.  
+     * @dev Reverts if not in admin status.  
      */
     modifier onlyAdmin() {
         require(owner != address(0));
@@ -146,7 +142,7 @@ contract OkeyDokeySale is Crowdsale {
     function _updateTokenBalanceState(address _beneficiary, uint256 _weiAmount) internal {
 
       // Fetch id.
-      bytes32 id = idOf[_beneficiary];
+      bytes32 id = whitelist.getIdOf(_beneficiary);
 
       // Calculate and add token balance.
       uint256 newTokens = _getTokenAmount(_weiAmount);
@@ -192,7 +188,7 @@ contract OkeyDokeySale is Crowdsale {
      */
     function _updateContributionState(address _beneficiary, uint256 _weiAmount) internal {
       // Prevent overflow.      
-      bytes32 id = idOf[_beneficiary];
+      bytes32 id = whitelist.getIdOf(_beneficiary);
       contributionOf[id] = contributionOf[id].add(_weiAmount);
     }
 

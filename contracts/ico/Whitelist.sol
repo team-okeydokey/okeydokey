@@ -147,10 +147,10 @@ contract Whitelist {
      * @param _addresses Address of user to whitelist
      * @param _indices Index, from 0 to 4, indicating which address to modify.
      */
-    function whitelistAddresses(bytes32[] _ids, address[] _addresses, uint[] _indices) 
+    function batchWhitelistAddress(bytes32[] _ids, address[] _addresses, uint[] _indices) 
       public system {
 
-      _whitelistAddresses(_ids, _addresses, _indices);
+      _batchWhitelistAddress(_ids, _addresses, _indices);
     }
 
     /**
@@ -210,7 +210,7 @@ contract Whitelist {
      * @param _addresses Address of user to whitelist
      * @param _indices Index, from 0 to 4, indicating which address to modify.
      */
-    function _whitelistAddresses(bytes32[] _ids, address[] _addresses, uint[] _indices) 
+    function _batchWhitelistAddress(bytes32[] _ids, address[] _addresses, uint[] _indices) 
       internal {
 
       require(_ids.length > 0);

@@ -21,10 +21,10 @@ contract Reviews {
     mapping(uint256 => uint256[]) private reviewsFor;
 
     /** Address of OkeyDokey contract. */
-    address private okeyDokeyAddress;
+    address private okeydokeyAddress;
 
     /** Instance of OkeyDokey contract. */
-    OkeyDokey private okeyDokey;
+    OkeyDokey private okeydokey;
 
     /** Address of Reservations contract. */
     address private reservationsAddress;
@@ -62,7 +62,7 @@ contract Reviews {
     modifier system(address addr) {
 
         /* Verify admin. */
-        require(okeyDokey.isOkeyDokeyContract(addr));
+        require(okeydokey.isAdmin(addr));
 
         _;
     }
@@ -80,18 +80,18 @@ contract Reviews {
 	/**
      * Initialize other OKDK contracts this contract depends on.
      *
-     * @param _okeyDokeyAddress The address of main application contract.
+     * @param _okeydokeyAddress The address of main application contract.
      * @return success Whether the initialization was successful.
      */
-    function initializeContracts(address _okeyDokeyAddress) 
+    function initializeContracts(address _okeydokeyAddress) 
         OkeyDokeyAdmin public returns (bool success) {
-        require(_okeyDokeyAddress != address(0));
-        require(_okeyDokeyAddress != address(this));
+        require(_okeydokeyAddress != address(0));
+        require(_okeydokeyAddress != address(this));
 
-        okeyDokeyAddress = _okeyDokeyAddress;
-        okeyDokey = OkeyDokey(okeyDokeyAddress);
+        okeydokeyAddress = _okeydokeyAddress;
+        okeydokey = OkeyDokey(okeydokeyAddress);
 
-        reservationsAddress = okeyDokey.getAddress(3);
+        reservationsAddress = okeydokey.getAddress(3);
         reservations = Reservations(reservationsAddress);
 
         return true;

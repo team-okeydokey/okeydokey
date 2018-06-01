@@ -1,62 +1,59 @@
 pragma solidity ^0.4.19;
 
 import "../OkeyDokey.sol";
-import "../MarketDatabase.sol";
+import "./TransactionDatabase.sol";
+import "./ListingDatabase.sol";
 
 contract Market {
   
-  /** Admin of this contract. */
-  address private admin;
-
   /** Instance of OkeyDokey contract. */
-  OkeyDokey private okeyDokey;
+  OkeyDokey private okeydokey;
 
-  /** Instance of MarketDatabase contract. */
-  MarketDatabase private db;
+  /** Instance of TransactionDatabase contract. */
+  TransactionDatabase private transactionDB;
+
+  /** Instance of ListingDatabase contract. */
+  ListingDatabase private listingDB;
 
   /**
-   * Modifier for functions only smart contract owner(admin) can run.
+   * Modifier for functions only smart contract admins can run.
    */
-  modifier system() {
+  modifier onlyAdmin() {
+    require(okeydokey != address(0));
+    require(okeydokey.isAdmin(msg.sender));
 
-      /* Verify admin. */
-      require(okeydokey.isAdmin(msg.sender));
-
-      _;
+    _;
   }
 
   /**
-   * Constrctor function.
+   * Constrctor function. 
    *
-   * Set the admin.
-   */
-  function OkeyDokey() public {
-      admin = msg.sender;
-  }
-
-  /**
    * Initialize other OKDK contracts this contract depends on.
    *
-   * @param _okeyDokeyAddress The address of main application contract
+   * @param _okeydokeyAddress The address of main application contract
+   * @param _listingDBAddress The address of database contract for market data
    */
-  function initializeContracts(address _okeyDokeyAddress) 
-    systems public {
-    require(_okeyDokeyAddress != address(0));
-    require(_okeyDokeyAddress != address(this));
+  function Market(address _okeydokeyAddress, address _listingDBAddress) public {
+    require(_okeydokeyAddress != address(0));
+    require(_okeydokeyAddress != address(this));
 
-    okeyDokeyAddress = _okeyDokeyAddress;
-    okeyDokey = OkeyDokey(okeyDokeyAddress);
+    /* Initialize OkeyDokey. */
+    okeydokey = OkeyDokey(_okeydokeyAddress);
 
-    dbAddress = okeyDokey.getAddress();
-    db = 
+    /* Initialize transaction db. */
+    // address marketDBAddress = okeydokey.getAddress(okeydokey.TRANSACTION_DATABASE);
+    // transactionDB = MarketDatabase(dbAddress);
+
+    /* Initialize listing db. */
+    // address dbAddress = okeydokey.getAddress(okeydokey.MARKET_DATABASE);
+    // listingDB = MarketDatabase(dbAddress);
   }
-
 
   /** 
    * List item on market.
    */
-  function listItem(bytes32 _id, ) public {
-
+  function listItem(bytes32 _id, uint _price) public {
+    // db.write(_id, _price, );
   }
 
 }

@@ -16,10 +16,10 @@ contract HousesNew is Facilities, Market {
     mapping(uint256 => bytes32[]) private housesInGrid;
 
     /** Address of OkeyDokey contract. */
-    address private okeyDokeyAddress;
+    address private okeydokeyAddress;
 
     /** Instance of OkeyDokey contract. */
-    OkeyDokey private okeyDokey;
+    OkeyDokey private okeydokey;
 
     /** Structure of a house. */
     struct House {
@@ -47,12 +47,12 @@ contract HousesNew is Facilities, Market {
     /**
      * Modifier for functions only OkeyDokey smart contracts can run.
      * 
-     * @param addr The address to check.
+     * @param _addr The address to check.
      */
-    modifier system(address addr) {
+    modifier system(address _addr) {
 
         /* Verify admin. */
-        require(okeyDokey.isOkeyDokeyContract(addr));
+        require(okeydokey.isAdmin(_addr));
 
         _;
     }
@@ -112,16 +112,16 @@ contract HousesNew is Facilities, Market {
     /**
      * Initialize other OKDK contracts this contract depends on.
      *
-     * @param _okeyDokeyAddress The address of main application contract.
+     * @param _okeydokeyAddress The address of main application contract.
      * @return success Whether the initialization was successful.
      */
-    function initializeContracts(address _okeyDokeyAddress) 
+    function initializeContracts(address _okeydokeyAddress) 
         OkeyDokeyAdmin public returns (bool success) {
-        require(_okeyDokeyAddress != 0);
-        require(_okeyDokeyAddress != address(this));
+        require(_okeydokeyAddress != 0);
+        require(_okeydokeyAddress != address(this));
 
-        okeyDokeyAddress = _okeyDokeyAddress;
-        okeyDokey = OkeyDokey(okeyDokeyAddress);
+        okeydokeyAddress = _okeydokeyAddress;
+        okeydokey = OkeyDokey(okeydokeyAddress);
 
         return true;
     }

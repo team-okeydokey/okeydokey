@@ -2,6 +2,11 @@ pragma solidity ^0.4.19;
 
 contract OkeyDokey {
 
+  /** Contract codes */
+  uint constant public TOKEN = 0;
+  uint constant public MARKET = 100;
+  uint constant public TRANSACTION_DATABASE = 101; 
+
   /** Owner of this contract. */
   address private owner;
 
@@ -96,12 +101,11 @@ contract OkeyDokey {
    * @param _newAddress The address of the new contract
    */
   function updateAddress(uint _tag, address _newAddress) public onlyOwner {
-    require(msg.sender == admin);
-    require(newAddress != 0x0);
+    require(_newAddress != 0x0);
 
     if (addresses[_tag] == 0x0) {
-        /* New contract. */
-        contractCount += 1;
+      /* New contract. */
+      contractCount += 1;
     }
 
     addresses[_tag] = _newAddress;

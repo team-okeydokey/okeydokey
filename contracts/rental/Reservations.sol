@@ -25,10 +25,10 @@ contract Reservations is tokenRecipient {
     mapping(uint256 => uint256[]) private reservationsAt;
 
     /** Address of OkeyDokey contract. */
-    address private okeyDokeyAddress;
+    address private okeydokeyAddress;
 
     /** Instance of OkeyDokey contract. */
-    OkeyDokey private okeyDokey;
+    OkeyDokey private okeydokey;
 
     /** Address of Key Token contract. */
     address private tokenAddress;
@@ -78,12 +78,12 @@ contract Reservations is tokenRecipient {
     /**
      * Modifier for functions only OkeyDokey smart contracts can run.
      * 
-     * @param addr The address to check.
+     * @param _addr The address to check.
      */
-    modifier system(address addr) {
+    modifier system(address _addr) {
 
         /* Verify admin. */
-        require(okeyDokey.isOkeyDokeyContract(addr));
+        require(okeydokey.isAdmin(_addr));
 
         _;
     }
@@ -135,20 +135,20 @@ contract Reservations is tokenRecipient {
     /**
      * Initialize other OKDK contracts this contract depends on.
      *
-     * @param _okeyDokeyAddress The address of main application contract.
+     * @param _okeydokeyAddress The address of main application contract.
      */
-    function initializeContracts(address _okeyDokeyAddress) 
+    function initializeContracts(address _okeydokeyAddress) 
         OkeyDokeyAdmin public returns (bool success) {
-        require(_okeyDokeyAddress != address(0));
-        require(_okeyDokeyAddress != address(this));
+        require(_okeydokeyAddress != address(0));
+        require(_okeydokeyAddress != address(this));
 
-        okeyDokeyAddress = _okeyDokeyAddress;
-        okeyDokey = OkeyDokey(okeyDokeyAddress);
+        okeydokeyAddress = _okeydokeyAddress;
+        okeydokey = OkeyDokey(okeydokeyAddress);
 
-        tokenAddress = okeyDokey.getAddress(0);
+        tokenAddress = okeydokey.getAddress(0);
         token = OkeyToken(tokenAddress);
 
-        housesAddress = okeyDokey.getAddress(1);
+        housesAddress = okeydokey.getAddress(1);
         houses = Houses(housesAddress);
     }
         

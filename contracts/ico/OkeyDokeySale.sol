@@ -215,7 +215,6 @@ contract OkeyDokeySale is Crowdsale {
      * @param _address Address to deliver tokens to.
      */
     function releaseTokens(bytes32 _id, address _address) public onlyAdmin {
-      require(whitelist.idInWhitelist(_id));
       // require(idOf[_address] == _id);
 
       _deliverTokens(_address, tokensOf[_id].add(bonusTokensOf[_id]));

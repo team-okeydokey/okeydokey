@@ -20,8 +20,6 @@ contract Referral {
 	/* User id to address that provided the referral link for an address. */
 	mapping (bytes32 => bytes32) public referrerOf;
 
-	Whitelist private whitelist;
-
 	/**
 	 * @dev Reverts if not in owner status.   
 	 */
@@ -38,14 +36,12 @@ contract Referral {
 		require(systemAccess[msg.sender]);
 		_;
 	}
-	
+
 	/**
 	 * @dev Constructor, takes all necessary arguments.
-	 * @param _whitelist Address of whitelist contract
 	 */
-	function Referral(Whitelist _whitelist) public {
+	function Referral() public {
 		owner = msg.sender;
-		whitelist = _whitelist;
 		systemAccess[msg.sender] = true;
 	}
 
@@ -58,13 +54,13 @@ contract Referral {
 		systemAccess[_address] = _hasAccess;
 	}
 
-  /**
-   * @dev Get access level of an address. 
-   * @return Whether address has access
-   */
-  function getSystemAccess(address _address) public view returns (bool) {
-    return systemAccess[_address];
-  }
+	/**
+	* @dev Get access level of an address. 
+	* @return Whether address has access
+	*/
+	function getSystemAccess(address _address) public view returns (bool) {
+	return systemAccess[_address];
+	}
 
 	/**
 	 * @dev Add multiple referrers of multiple addresses.
@@ -111,9 +107,6 @@ contract Referral {
 	 */
 	function _addReferrer(bytes32 _referee, bytes32 _referrer) 
 		internal {
-	 
-		require(whitelist.idInWhitelist(_referee));
-		require(whitelist.idInWhitelist(_referrer));
 
 		referrerOf[_referee] = _referrer;
 	}

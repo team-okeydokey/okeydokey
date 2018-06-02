@@ -16,7 +16,7 @@ library Database {
   /* Represents a table. */
 	struct Table {
 
-    /* NAme of table. */
+    /* Name of table. */
 		bytes32 name;
 
     /* Number of rows in table. */
@@ -24,6 +24,18 @@ library Database {
 
     /* Number of columns in table. */
     uint width;
+
+    /* Index of next added row. */
+    uint nextRow;
+
+    /* Index of next added column. */
+    uint nextColumn;
+
+    /* Stores row descriptord. */
+    mapping(uint => Row) rows;
+
+    /* Stores matrix of cells. */
+    mapping(uint => Column) columns;
 
     /* Stores matrix of cells. */
     mapping(uint => mapping(uint => Cell)) cells;
@@ -39,6 +51,19 @@ library Database {
        Keys are created with keccak256(column name, bytes). */
     mapping(bytes32 => uint[]) cache;
 	}
+
+  /* Represents a database row. */
+  struct Row {
+    uint index;
+    bool deleted;
+  }
+
+  /* Represents a database column. */
+  struct Column {
+    uint index;
+    bytes32 name;
+    bool deleted;
+  }
 
   /* Represents a database cell. */
   struct Cell {
@@ -73,26 +98,68 @@ library Database {
    */
   function createRow(DB storage self, bytes32 _tableName) public {
     // Increment table size.
+    Table storage table = self.tables[_tableName];
+
+    // Create Row instance.
+    Row memory row;
+    row.index = table.nextRow;
+    row.deleted = false;
+
+    // Store newly created Row instance to storage.
+    table.rows[table.nextRow] = row;
+
+    // Set table metadata.
+    table.size = table.size.add(1);
+    table.nextRow = table.nextRow.add(1);
   }
 
   /* 
    * Delete a row from the table.
    * 
+   * @param _tableName Name of table
    * @param _row Index of row to delete
    */
-  function deleteRow(DB storage self, uint _row) public {
-    
+  function deleteRow(DB storage self, bytes32 _tableName, uint _row) public {
+
+    require(hasRow(self, _tableName, _row));
+
+    // Load corresponding table.
+    Table storage table = self.tables[_tableName];
+
+    // Load corresponding row.
+    Row storage row = table.rows[_row];
+
+    row.deleted = true;
+
+    // Decrement table size.
+    table.size = table.size.sub(1);
   }
 
   /* 
    * Create a column within a table.
    * 
    * @param _tableName Name of table
+   * @param _columnName Name of column to delete
    * @param _default Default value, in bytes
    */
   function createColumn(DB storage self, 
-    bytes32 _tableName, bytes _default) public {
+    bytes32 _tableName, bytes32 _columnName, bytes _default) public {
 
+    // Increment table width.
+    Table storage table = self.tables[_tableName];
+
+    // Create Column instance.
+    Column memory column;
+    column.index = table.nextColumn;
+    column.name = _columnName;
+    column.deleted = false;
+
+    // Store newly created Row instance to storage.
+    table.columns[table.nextColumn] = column;
+
+    // Set table metadata.
+    table.width = table.width.add(1);
+    table.nextColumn = table.nextColumn.add(1);
   }
 
   /* 
@@ -101,8 +168,24 @@ library Database {
    * @param _tableName Name of table
    * @param _columnName Name of column to delete
    */
-  function deleteColumn(DB storage self, bytes32 _columnName) public {
+  function deleteColumn(DB storage self, 
+    bytes32 _tableName, bytes32 _columnName) public {
 
+    bool hasCol;
+    uint columnIndex;
+    (hasCol, columnIndex) = hasColumn(self, _tableName, _columnName);
+    require(hasCol);
+
+    // Load corresponding table.
+    Table storage table = self.tables[_tableName];
+
+    // Load corresponding column.
+    Column storage column = table.columns[columnIndex];
+
+    column.deleted = true;
+
+    // Decrement table width.
+    table.width = table.width.sub(1);
   }
 
   /* 
@@ -116,19 +199,27 @@ library Database {
   function write(DB storage self, bytes32 _tableName, 
     uint _row, bytes32 _columnName, bytes _data) public {
 
+    require(hasRow(self, _tableName, _row));
+
+    bool hasCol;
+    uint columnIndex;
+    (hasCol, columnIndex) = hasColumn(self, _tableName, _columnName);
+    require(hasCol);
+
     // Load corresponding table.
     Table storage table = self.tables[_tableName];
 
-    require(table.size > _row);
+    // Load corresponding row.
+    Row storage row = table.rows[_row];
+
+    // Load corresponding column.
+    Column storage column = table.columns[columnIndex];
 
     // Calculate data hash that will be used as cache when fetching.
     bytes32 hash = keccak256(_columnName, _data);
 
-    // Fetch column index.
-    uint column = table.columnIndices[_columnName];
- 
     // Fetch cell in coordinate.
-    Cell storage cell = table.cells[_row][column];
+    Cell storage cell = table.cells[_row][columnIndex];
 
     // Fetch array of rows that contan same data in same column.
     uint[] storage rows = table.cache[cell.columnHash];
@@ -145,14 +236,14 @@ library Database {
 
     // Write to cell.
     cell.row = _row;
-    cell.column = column;
+    cell.column = columnIndex;
     cell.data = _data;
     cell.dataHash = keccak256(_data);
     cell.columnHash = keccak256(_columnName, _data);
     cell.deleted = false;
 
     // Insert cell to table.
-    table.cells[_row][column] = cell;
+    table.cells[_row][columnIndex] = cell;
   }
 
   /* 
@@ -166,16 +257,21 @@ library Database {
   function deleteCell(DB storage self, bytes32 _tableName, 
     uint _row, bytes32 _columnName) public {
 
+    require(hasRow(self, _tableName, _row));
+
+    bool hasCol;
+    uint columnIndex;
+    (hasCol, columnIndex) = hasColumn(self, _tableName, _columnName);
+    require(hasCol);
+
     // Load corresponding table.
     Table storage table = self.tables[_tableName];
-
-    require(table.size > _row);
-
-    // Fetch index of column corresponding to the given name.
-    uint column = table.columnIndices[_columnName];
+    
+    // Load corresponding row.
+    Row storage row = table.rows[_row];
 
     // Fetch cell in coordinate.
-    Cell storage cell = table.cells[_row][column];
+    Cell storage cell = table.cells[_row][columnIndex];
 
     // Remove cell contents.
     // cell.row = 0;
@@ -193,19 +289,30 @@ library Database {
    * @param _tableName Name of table
    * @param _row Row index to read from
    * @param _columnName Column name to read from
+   * @returns Whether data is not deleted
    * @returns Extracted data
    */
   function read(DB storage self, bytes32 _tableName, uint _row, bytes32 _columnName) 
-    public view returns (bytes) {
+    public view returns (bool, bytes) {
+
+    require(hasRow(self, _tableName, _row));
+
+    bool hasCol;
+    uint columnIndex;
+    (hasCol, columnIndex) = hasColumn(self, _tableName, _columnName);
+    require(hasCol);
 
     // Load corresponding table.
     Table storage table = self.tables[_tableName];
 
-    // Fetch index of column corresponding to the given name.
-    uint column = table.columnIndices[_columnName];
+    // Load corresponding cell.
+    Cell storage cell = table.cells[_row][columnIndex];
 
-    // Load data in (row, column).
-    return table.cells[_row][column].data;
+    // Find out if cell is deleted. Row deletion was checked in hasRow. 
+    bool intact = !cell.deleted;
+
+    // Return availability and data in (row, column).
+    return (intact, cell.data);
   }
 
   /* 
@@ -219,11 +326,13 @@ library Database {
   function query(DB storage self, bytes32 _tableName, bytes32 _columnName, bytes _data) 
     public view returns (uint[]) {
 
+    bool hasCol;
+    uint columnIndex;
+    (hasCol, columnIndex) = hasColumn(self, _tableName, _columnName);
+    require(hasCol);
+
     // Load corresponding table.
     Table storage table = self.tables[_tableName];
-
-    // Fetch column index corresponding to given column name.
-    uint column = table.columnIndices[_columnName];
 
     // Calculate data hash that serves as the key to data cache.
     bytes32 hash = keccak256(_columnName, _data);
@@ -235,13 +344,70 @@ library Database {
     uint[] storage filteredRows;
 
     for (uint i = 0; i < rows.length; i++) {
-      Cell storage cell = table.cells[rows[i]][column];
-      if (!cell.deleted) {
+      Row storage row = table.rows[rows[i]];
+      if (!row.deleted) {
         filteredRows.push(rows[i]);
       }
     }
 
     return filteredRows;
+  }
+
+  /* 
+   * Query if a row of index exists.
+   * 
+   * @param _tableName Name of table
+   * @param _row Row index to query
+   * @returns Whether the row exists
+   */
+  function hasRow(DB storage self, 
+    bytes32 _tableName, uint _row) public returns (bool) {
+
+    // Load corresponding table.
+    Table storage table = self.tables[_tableName];
+
+    // Load corresponding row.
+    Row storage row = table.rows[_row];
+
+    bool withinRange = table.nextRow > _row;
+    bool notDeleted = !row.deleted;
+
+    return withinRange && notDeleted;
+  }
+
+  /* 
+   * Query if a column with name exists.
+   * 
+   * @param _tableName Name of table
+   * @param _columnName Column name to query
+   * @returns Whether the column name exists
+   * @returns Column index, if found
+   */
+  function hasColumn(DB storage self, 
+    bytes32 _tableName, bytes32 _columnName) public returns (bool, uint) {
+
+    // Load corresponding table.
+    Table storage table = self.tables[_tableName];
+    
+    // Load column index.
+    uint columnIndex = table.columnIndices[_columnName];
+
+    // Load corresponding row.
+    Column storage column = table.columns[columnIndex];
+
+    bool withinRange = table.nextColumn > columnIndex;
+
+    bool notDeleted = !column.deleted;
+
+    /* Weed out false positives when checking if provided column name exists.
+       If the column name did not exist, columnIndex would be 0.
+       String comparison is better when done after hashing with keccak256. */
+    bool indexMatches = keccak256(table.columnNames[columnIndex]) 
+                        == keccak256(_columnName); 
+
+    bool hasCol = withinRange && notDeleted && indexMatches;
+
+    return (hasCol, columnIndex);
   }
 
 }

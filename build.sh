@@ -45,7 +45,7 @@ copy_files() {
 	echo -n "* Copying files to okdkjs... "
 	# Copy json abi files to okdkjs.
 	# find ./build/contracts/ ! -name Migrations.json -exec cp -t ../okdkjs/lib/contracts/ {} +
-	rsync -r --exclude='Migrations.json' --exclude='Test.json' ./build/contracts/ ../okdkjs/lib/contracts/
+	rsync -r --exclude='Migrations.json' --exclude='Test.json' ./build/contracts/ ../okdkjs/assets/contracts/
 	echo "done"
 
 	echo -n "* Copying files to okdkjs-ico... "

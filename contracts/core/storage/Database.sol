@@ -1,4 +1,4 @@
-pragma solidity ^0.4.19;
+pragma solidity ^0.4.24;
 
 import "../../libs/SafeMath.sol";
 
@@ -89,6 +89,16 @@ library Database {
    */
   function createTable(DB storage self, bytes32 _name) public {
 
+    /* Create table. */
+    Table memory table;
+    table.name = _name;
+    table.size = 0;
+    table.width = 0;
+    table.nextRow = 0;
+    table.nextColumn = 0;
+
+    /* Store table. */
+    self.tables[_name] = table;
   }
 
   /* 
@@ -353,6 +363,36 @@ library Database {
     return filteredRows;
   }
 
+/* 
+   * Query db size.
+   * 
+   * @param _tableName Name of table
+   * @returns Whether the row exists
+   */
+  function tableSize(DB storage self, 
+    bytes32 _tableName) public view returns (uint) {
+
+    // Load corresponding table.
+    Table storage table = self.tables[_tableName];
+
+    return table.size;
+  }
+
+  /* 
+   * Query db width.
+   * 
+   * @param _tableName Name of table
+   * @returns Whether the row exists
+   */
+  function tableWidth(DB storage self, 
+    bytes32 _tableName) public view returns (uint) {
+
+    // Load corresponding table.
+    Table storage table = self.tables[_tableName];
+
+    return table.width;
+  }
+
   /* 
    * Query if a row of index exists.
    * 
@@ -361,7 +401,7 @@ library Database {
    * @returns Whether the row exists
    */
   function hasRow(DB storage self, 
-    bytes32 _tableName, uint _row) public returns (bool) {
+    bytes32 _tableName, uint _row) public view returns (bool) {
 
     // Load corresponding table.
     Table storage table = self.tables[_tableName];
@@ -384,7 +424,7 @@ library Database {
    * @returns Column index, if found
    */
   function hasColumn(DB storage self, 
-    bytes32 _tableName, bytes32 _columnName) public returns (bool, uint) {
+    bytes32 _tableName, bytes32 _columnName) public view returns (bool, uint) {
 
     // Load corresponding table.
     Table storage table = self.tables[_tableName];
